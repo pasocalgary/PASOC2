@@ -139,7 +139,14 @@ export default function EventReportPage() {
                 title="Attendance Per Event"
               />
               <ReportDataTable columns={COLUMNS} rows={data.tableRows} defaultSort="startDatetime" />
-              <ReportExportBar data={data.tableRows} columns={COLUMNS} filename="event-report" />
+              <ReportExportBar
+                data={data.tableRows}
+                columns={COLUMNS}
+                filename="event-report"
+                title="Event Report"
+                kpis={kpis}
+                dateRange={`${filters.startDate} – ${filters.endDate}`}
+              />
             </>
           )}
         </div>

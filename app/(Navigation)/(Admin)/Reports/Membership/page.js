@@ -134,7 +134,14 @@ export default function MembershipReportPage() {
                 title="New Member Signups"
               />
               <ReportDataTable columns={COLUMNS} rows={data.tableRows} defaultSort="applicationDate" />
-              <ReportExportBar data={data.tableRows} columns={COLUMNS} filename="membership-report" />
+              <ReportExportBar
+                data={data.tableRows}
+                columns={COLUMNS}
+                filename="membership-report"
+                title="Membership Report"
+                kpis={kpis}
+                dateRange={`${filters.startDate} – ${filters.endDate}`}
+              />
             </>
           )}
         </div>

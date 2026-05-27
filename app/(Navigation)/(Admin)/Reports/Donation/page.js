@@ -146,7 +146,14 @@ export default function DonationReportPage() {
                 title="Donations Over Time"
               />
               <ReportDataTable columns={COLUMNS} rows={data.tableRows} defaultSort="donationDate" />
-              <ReportExportBar data={data.tableRows} columns={COLUMNS} filename="donation-report" />
+              <ReportExportBar
+                data={data.tableRows}
+                columns={COLUMNS}
+                filename="donation-report"
+                title="Donation Report"
+                kpis={kpis}
+                dateRange={`${filters.startDate} – ${filters.endDate}`}
+              />
             </>
           )}
         </div>
