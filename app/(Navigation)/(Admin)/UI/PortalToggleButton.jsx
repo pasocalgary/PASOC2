@@ -42,7 +42,8 @@ export default function PortalToggleButton() {
 			}`}
 		>
 			{/* label also switches depending on current portal */}
-			{inAdminPortal ? "Switch to Member" : "Switch to Admin"}
+			<span className="hidden sm:inline">{inAdminPortal ? "Switch to Member" : "Switch to Admin"}</span>
+			<span className="sm:hidden">{inAdminPortal ? "Member" : "Admin"}</span>
 		</button>
 	);
 }

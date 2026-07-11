@@ -3,6 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { User, Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useUserAuth } from "../../../_utils/auth-context";
 import PortalToggleButton from "../../(Admin)/UI/PortalToggleButton";
 
@@ -10,7 +11,6 @@ const navLinks = [
 	{ label: "Home", href: "/" },
 	{ label: "Events", href: "/Events" },
 	{ label: "Bulletins", href: "/Bulletins" },
-	// these two are placeholders; no dedicated pages exist yet
 	{ label: "PASOC in Motion", href: "/Motion" },
 	{ label: "Sponsors", href: "/Sponsors" },
 	{ label: "About", href: "/About" },
@@ -22,17 +22,21 @@ export function Header() {
 	const [hoveredNav, setHoveredNav] = React.useState(null);
 	const [visible, setVisible] = React.useState(true);
 	const lastScrollY = React.useRef(0);
+	const menuOpenRef = React.useRef(false);
+	const pathname = usePathname();
 	const { user } = useUserAuth();
+
+	React.useEffect(() => {
+		menuOpenRef.current = menuOpen;
+	}, [menuOpen]);
 
 	React.useEffect(() => {
 		const handleScroll = () => {
 			const currentY = window.scrollY;
-			// Show when scrolling up or near top, hide when scrolling down
 			if (currentY < 10 || currentY < lastScrollY.current) {
 				setVisible(true);
-			} else if (currentY > lastScrollY.current + 5) {
+			} else if (currentY > lastScrollY.current + 5 && !menuOpenRef.current) {
 				setVisible(false);
-				setMenuOpen(false); // close mobile menu when hiding
 			}
 			lastScrollY.current = currentY;
 		};
@@ -56,17 +60,17 @@ export function Header() {
 				{/* Brand: logo + title */}
 				<Link
 					href="/"
-					className="flex items-center gap-3 no-underline flex-1 min-w-0 justify-center md:justify-start"
+					className="flex items-center gap-2 no-underline flex-1 min-w-0 justify-center md:justify-start"
 				>
 					<Image
 						src="/pasoc_logo.png"
 						alt="PASOC Logo"
 						width={100}
 						height={100}
-						className="object-contain shrink-0"
+						className="object-contain shrink-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-25 lg:h-25"
 					/>
 					<span
-						className="text-black leading-snug wrap-break-word"
+						className=" text-black leading-snug wrap-break-word"
 						style={{
 							fontFamily: "var(--font-serif)",
 							fontSize: "clamp(1rem, 2.5vw, 1.75rem)",
@@ -112,46 +116,54 @@ export function Header() {
 
 			{/* Desktop nav - constrained to max-w-7xl*/}
 			<div className="max-w-7xl mx-auto px-6 w-full">
-				<nav className="hidden md:flex w-full text-lg font-bold">
-					{navLinks.map((link) => (
-						<Link
-							key={link.label}
-							href={link.href}
-							className="flex-1 py-2.5 text-center whitespace-nowrap no-underline transition-all duration-200"
-							style={{
-								backgroundColor:
-									hoveredNav === link.label
-										? "#556B2F"
-										: "transparent",
-								color:
-									hoveredNav === link.label
-										? "#ffffff"
-										: "#556B2F",
-							}}
-							onMouseEnter={() => setHoveredNav(link.label)}
-							onMouseLeave={() => setHoveredNav(null)}
-						>
-							{link.label}
-						</Link>
-					))}
+				<nav className="hidden md:flex w-full text-sm lg:text-lg font-bold">
+					{navLinks.map((link) => {
+						const isActive = pathname === link.href;
+						const isHovered = hoveredNav === link.label;
+						return (
+							<Link
+								key={link.label}
+								href={link.href}
+								className="flex-1 py-1.5 lg:py-2.5 text-center whitespace-nowrap no-underline transition-all duration-200"
+								style={{
+									backgroundColor: isHovered && !isActive ? "#556B2F" : "transparent",
+									color: isActive ? "#556B2F" : isHovered ? "#ffffff" : "#556B2F",
+									borderBottom: isActive ? "3px solid #556B2F" : "3px solid transparent",
+									fontWeight: isActive ? "800" : undefined,
+								}}
+								onMouseEnter={() => setHoveredNav(link.label)}
+								onMouseLeave={() => setHoveredNav(null)}
+							>
+								{link.label}
+							</Link>
+						);
+					})}
 				</nav>
 			</div>
 
 			{/* Mobile dropdown menu */}
-			{menuOpen && (
-				<nav className="flex md:hidden flex-col border-t-2 border-[#556B2F] bg-[#f5f5f4]">
-					{navLinks.map((link) => (
+			<nav
+				className="md:hidden flex flex-col border-[#556B2F] bg-[#f5f5f4] overflow-hidden transition-[max-height,border-top-width] duration-300 ease-in-out"
+				style={{ maxHeight: menuOpen ? "500px" : "0px", borderTopWidth: menuOpen ? "2px" : "0px" }}
+			>
+				{navLinks.map((link) => {
+					const isActive = pathname === link.href;
+					return (
 						<Link
 							key={link.label}
 							href={link.href}
 							onClick={() => setMenuOpen(false)}
-							className="px-6 py-3.5 no-underline font-bold text-[17px] text-[#556B2F] border-b border-stone-300 transition-colors duration-150 hover:bg-[#556B2F] hover:text-white"
+							className="px-6 py-3.5 no-underline font-bold text-[17px] border-b border-stone-300 transition-colors duration-150 hover:bg-[#556B2F] hover:text-white"
+							style={{
+								backgroundColor: isActive ? "#556B2F" : undefined,
+								color: isActive ? "#ffffff" : "#556B2F",
+							}}
 						>
 							{link.label}
 						</Link>
-					))}
-				</nav>
-			)}
+					);
+				})}
+			</nav>
 		</header>
 	);
 }

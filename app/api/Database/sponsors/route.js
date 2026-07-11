@@ -7,10 +7,6 @@ import {
 	getModerationErrorMessage, 
 } from "@/app/_utils/moderationHelpers";
 
-const FEATURED_SPONSOR_LIMIT = 5;
-const FEATURED_LIMIT_REACHED_MESSAGE =
-	"Featured limit is reached. Move one to Over the Years first.";
-
 function toDbSponsorStatus(value) {
 	const normalized = String(value || "")
 		.trim()

@@ -5,10 +5,20 @@
   --foreground: #111827;
 }
 
+html {
+  font-size: 87.5%; /* ~14px base on mobile — scales all rem-based sizes down */
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 100%; /* restore 16px base on sm+ screens */
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-work-sans);
   --font-serif: var(--font-instrument-serif);
 }
 @layer base {

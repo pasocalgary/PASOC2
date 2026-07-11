@@ -88,12 +88,13 @@ function DonateContent() {
   };
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-10 bg-white text-neutral-900 min-h-screen font-sans">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="flex-1 h-px bg-gray-300"></div>
-        <h1 className="font-serif text-[2rem] italic font-normal text-[#556B2F] tracking-wide">DONATE</h1>
-        <div className="flex-1 h-px bg-gray-300"></div>
-      </div>
+    <main className="max-w-2xl mx-auto px-6 py-10 text-neutral-900 min-h-screen font-sans">
+      <h1
+        className="text-4xl font-bold text-[#556B2F] mb-8 pb-3 border-b-4 border-[#556B2F]"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
+        Donate
+      </h1>
 
       {success && (
         <div className="bg-green-50 border border-green-300 rounded-xl p-6 mb-8 text-center shadow-sm">

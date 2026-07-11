@@ -272,9 +272,9 @@ export default function EventManagerPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col md:flex-row gap-8 mt-4">
+        <div className="flex flex-col lg:flex-row gap-8 mt-4">
           {/* Left Side: Upcoming Events */}
-          <div className="w-full md:w-auto md:max-w-sm flex flex-col">
+          <div className="w-full lg:w-auto lg:max-w-sm flex flex-col">
             <div className="mb-4">
               <div className="inline-block border border-[#2a2420] rounded-full px-6 py-2">
                 <span className="font-serif text-lg font-semibold text-[#2a2420]">{selLabel}</span>
@@ -332,18 +332,18 @@ export default function EventManagerPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2 text-center font-semibold mb-2">
-              <div>Sun</div>
-              <div>Mon</div>
-              <div>Tue</div>
-              <div>Wed</div>
-              <div>Thu</div>
-              <div>Fri</div>
-              <div>Sat</div>
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-2 text-center font-semibold mb-2 text-xs sm:text-base">
+              <div><span className="hidden sm:inline">Sun</span><span className="sm:hidden">Su</span></div>
+              <div><span className="hidden sm:inline">Mon</span><span className="sm:hidden">Mo</span></div>
+              <div><span className="hidden sm:inline">Tue</span><span className="sm:hidden">Tu</span></div>
+              <div><span className="hidden sm:inline">Wed</span><span className="sm:hidden">We</span></div>
+              <div><span className="hidden sm:inline">Thu</span><span className="sm:hidden">Th</span></div>
+              <div><span className="hidden sm:inline">Fri</span><span className="sm:hidden">Fr</span></div>
+              <div><span className="hidden sm:inline">Sat</span><span className="sm:hidden">Sa</span></div>
             </div>
 
             <div
-              className="grid grid-cols-7 gap-2"
+              className="grid grid-cols-7 gap-0.5 sm:gap-2"
               style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
             >
               {weeks.map((week, i) =>
@@ -352,7 +352,7 @@ export default function EventManagerPage() {
                   return (
                     <div
                       key={`${i}-${j}`}
-                      className="border border-gray-300 bg-gray-50 p-2 flex flex-col items-center justify-start h-32 overflow-hidden cursor-pointer"
+                      className="border border-gray-300 bg-gray-50 p-1 sm:p-2 flex flex-col items-center justify-start h-16 sm:h-28 lg:h-32 overflow-hidden cursor-pointer"
                       onClick={() => {
                         if (day) setSelectedDate(formatDateStr(viewYear, viewMonth, day));
                       }}
@@ -360,17 +360,17 @@ export default function EventManagerPage() {
                       {day && (
                         <>
                           <span
-                            className={`font-semibold ${
+                            className={`text-xs sm:text-sm font-semibold ${
                               day === todayDay &&
                               viewMonth === todayMonth &&
                               viewYear === todayYear
-                                ? "bg-[#556B2F] text-white rounded-full w-8 h-8 flex items-center justify-center"
+                                ? "bg-[#556B2F] text-white rounded-full w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center"
                                 : ""
                             }`}
                           >
                             {day}
                           </span>
-                          <div className="mt-2 flex flex-col gap-1 w-full">
+                          <div className="mt-0.5 sm:mt-2 flex flex-col gap-0.5 sm:gap-1 w-full">
                             {dayEvents.map((event) => (
                               <div
                                 key={event.id}
@@ -378,7 +378,7 @@ export default function EventManagerPage() {
                                   e.stopPropagation();
                                   openForm(event);
                                 }}
-                                className="text-xs bg-[#dfe8ce] rounded px-2 py-1 truncate cursor-pointer hover:bg-[#cfdcb5]"
+                                className="text-xs bg-[#dfe8ce] rounded px-1 sm:px-2 py-0.5 sm:py-1 truncate cursor-pointer hover:bg-[#cfdcb5]"
                               >
                                 {event.title}
                               </div>
@@ -413,7 +413,7 @@ export default function EventManagerPage() {
         {showForm && (
           <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50">
             <form
-              className="bg-white border-2 border-[#556B2F] rounded-xl shadow-lg p-8 flex flex-col gap-4 w-96"
+              className="bg-white border-2 border-[#556B2F] rounded-xl shadow-lg p-6 sm:p-8 flex flex-col gap-4 w-full max-w-sm mx-4"
               onSubmit={handleSubmit}
             >
               <h2 className="text-2xl font-bold text-[#556B2F] mb-2">

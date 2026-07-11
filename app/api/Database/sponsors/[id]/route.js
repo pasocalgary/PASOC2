@@ -33,6 +33,81 @@ async function getSponsorModerationError(name, description) {
 	return "";
 }
 
+export async function PUT(request, { params }) {
+	try {
+		const { id } = await params;
+		const body = await request.json();
+		const fields = [];
+		const values = [];
+
+		if (body.name !== undefined) {
+			const name = body.name.trim();
+			if (!name) {
+				return NextResponse.json({ error: "Name is required" }, { status: 400 });
+			}
+			const moderationError = await getSponsorModerationError(name, body.description ?? "");
+			if (moderationError) {
+				return NextResponse.json({ error: moderationError }, { status: 400 });
+			}
+			fields.push("sponsorName = ?");
+			values.push(name);
+		}
+
+		if (body.description !== undefined) {
+			fields.push("sponsorDescription = ?");
+			values.push(body.description.trim());
+		}
+
+		if (body.status !== undefined) {
+			const status = toDbSponsorStatus(body.status);
+			if (!status) {
+				return NextResponse.json(
+					{ error: "Status must be Current or Previous" },
+					{ status: 400 },
+				);
+			}
+			fields.push("sponsorStatus = ?");
+			values.push(status);
+		}
+
+		if (fields.length === 0) {
+			return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+		}
+
+		values.push(id);
+		const [result] = await pool.query(
+			`UPDATE SponsorInfo SET ${fields.join(", ")} WHERE sponsorId = ?`,
+			values,
+		);
+
+		if (result.affectedRows === 0) {
+			return NextResponse.json({ error: "Sponsor not found" }, { status: 404 });
+		}
+
+		return NextResponse.json({ success: true });
+	} catch (err) {
+		console.error("[PUT /api/Database/sponsors/[id]]", err.message);
+		return NextResponse.json({ error: err.message }, { status: 500 });
+	}
+}
+
+export async function DELETE(request, { params }) {
+	try {
+		const { id } = await params;
+		const [result] = await pool.query(
+			`DELETE FROM SponsorInfo WHERE sponsorId = ?`,
+			[id],
+		);
+		if (result.affectedRows === 0) {
+			return NextResponse.json({ error: "Sponsor not found" }, { status: 404 });
+		}
+		return NextResponse.json({ success: true });
+	} catch (err) {
+		console.error("[DELETE /api/Database/sponsors/[id]]", err.message);
+		return NextResponse.json({ error: err.message }, { status: 500 });
+	}
+}
+
 export async function GET() {
 	try {
 		const [rows] = await pool.query(`

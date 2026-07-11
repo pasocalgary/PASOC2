@@ -160,14 +160,14 @@ export default function Events() {
 	};
 
 	return (
-		<div className="min-h-screen flex flex-col md:flex-row gap-10 py-10 mx-5 text-gray-800">
+		<div className="min-h-screen flex flex-col lg:flex-row gap-6 lg:gap-10 py-6 lg:py-10 mx-2 lg:mx-5 text-gray-800">
 			<FloatingButton />
 
-			<section className="w-full md:w-auto max-w-md">
-				<div className="p-6 bg-white rounded-lg shadow-lg">
+			<section className="w-full lg:w-auto lg:max-w-md">
+				<div className="p-4 lg:p-6 bg-white rounded-lg shadow-lg">
 					<h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
 
-					<div className="flex max-h-[50vh] flex-col gap-3 overflow-y-auto pr-2 md:max-h-128">
+					<div className="flex max-h-48 flex-col gap-3 overflow-y-auto pr-2 lg:max-h-128">
 						{upcomingEvents.length === 0 && (
 							<p className="text-sm text-gray-500">
 								No upcoming events right now.
@@ -192,7 +192,7 @@ export default function Events() {
 				</div>
 			</section>
 
-			<section className="p-6 w-full md:w-4/5 shadow-lg rounded-lg">
+			<section className="p-3 sm:p-6 w-full lg:w-4/5 shadow-lg rounded-lg">
 				<div className="flex justify-between items-center mb-4">
 					<h2 className="text-xl font-bold">{monthName} {year}</h2>
 
@@ -213,18 +213,18 @@ export default function Events() {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-7 gap-2 text-center font-semibold mb-2">
-					<div>Sun</div>
-					<div>Mon</div>
-					<div>Tue</div>
-					<div>Wed</div>
-					<div>Thu</div>
-					<div>Fri</div>
-					<div>Sat</div>
+				<div className="grid grid-cols-7 gap-0.5 sm:gap-2 text-center font-semibold mb-2 text-xs sm:text-base">
+					<div><span className="hidden sm:inline">Sun</span><span className="sm:hidden">Su</span></div>
+					<div><span className="hidden sm:inline">Mon</span><span className="sm:hidden">Mo</span></div>
+					<div><span className="hidden sm:inline">Tue</span><span className="sm:hidden">Tu</span></div>
+					<div><span className="hidden sm:inline">Wed</span><span className="sm:hidden">We</span></div>
+					<div><span className="hidden sm:inline">Thu</span><span className="sm:hidden">Th</span></div>
+					<div><span className="hidden sm:inline">Fri</span><span className="sm:hidden">Fr</span></div>
+					<div><span className="hidden sm:inline">Sat</span><span className="sm:hidden">Sa</span></div>
 				</div>
 
 				<div
-					className="grid grid-cols-7 gap-2"
+					className="grid grid-cols-7 gap-0.5 sm:gap-2"
 					style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
 				>
 					{weeks.map((week, i) =>
@@ -234,28 +234,28 @@ export default function Events() {
 							return (
 								<div
 									key={`${i}-${j}`}
-									className="border border-gray-300 bg-gray-50 p-2 flex flex-col items-center justify-start h-32 overflow-hidden"
+									className="border border-gray-300 bg-gray-50 p-1 sm:p-2 flex flex-col items-center justify-start h-16 sm:h-28 lg:h-32 overflow-hidden"
 								>
 									{day && (
 										<>
 											<span
-												className={`font-semibold ${
+												className={`text-xs sm:text-sm font-semibold ${
 													day === today.getDate() &&
 													month === today.getMonth() &&
 													year === today.getFullYear()
-														? "bg-[#556B2F] text-white rounded-full w-8 h-8 flex items-center justify-center"
+														? "bg-[#556B2F] text-white rounded-full w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center"
 														: ""
 												}`}
 											>
 												{day}
 											</span>
 
-											<div className="mt-2 flex flex-col gap-1">
+											<div className="mt-0.5 sm:mt-2 w-full flex flex-col gap-0.5 sm:gap-1">
 												{dayEvents.map((event, idx) => (
 													<div
 														key={`${event.eventId}-${idx}`}
 														onClick={() => handleEventsClick(event)}
-														className="text-xs bg-[#dfe8ce] rounded px-2 py-1 truncate cursor-pointer hover:bg-[#cfdcb5]"
+														className="text-xs bg-[#dfe8ce] rounded px-1 sm:px-2 py-0.5 sm:py-1 cursor-pointer hover:bg-[#cfdcb5] w-full wrap-break-word leading-tight line-clamp-2"
 													>
 														{event.title}
 													</div>

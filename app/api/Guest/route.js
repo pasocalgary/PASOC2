@@ -31,6 +31,7 @@ export async function POST(req) {
       [name, email]
     );
 
+    const resend = getResend();
     await resend.emails.send({
       from: 'Pangasinan Society of Calgary <noreply@pasoc.cloud>',
       to: email,

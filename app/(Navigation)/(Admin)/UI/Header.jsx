@@ -102,31 +102,28 @@ export function Header() {
 			</div>
 
 			{/* Mobile dropdown */}
-			{menuOpen && (
-				<nav className="flex md:hidden flex-col border-t border-white/20 bg-[#3a4a20]">
-					{navLinks.map((link) => {
-						const isActive = pathname === link.href;
-						return (
-							<Link
-								key={link.label}
-								href={link.href}
-								onClick={() => setMenuOpen(false)}
-								className="px-6 py-3.5 no-underline font-bold text-[15px] border-b border-white/10 transition-colors duration-150"
-								style={{
-									color: isActive
-										? "#ffffff"
-										: "rgba(255,255,255,0.7)",
-									backgroundColor: isActive
-										? "rgba(255,255,255,0.1)"
-										: "transparent",
-								}}
-							>
-								{link.label}
-							</Link>
-						);
-					})}
-				</nav>
-			)}
+			<nav
+				className="md:hidden flex flex-col bg-[#3a4a20] overflow-hidden transition-[max-height,border-top-width] duration-300 ease-in-out"
+				style={{ maxHeight: menuOpen ? "500px" : "0px", borderTopWidth: menuOpen ? "1px" : "0px", borderColor: "rgba(255,255,255,0.2)", borderTopStyle: "solid" }}
+			>
+				{navLinks.map((link) => {
+					const isActive = pathname === link.href;
+					return (
+						<Link
+							key={link.label}
+							href={link.href}
+							onClick={() => setMenuOpen(false)}
+							className="px-6 py-3.5 no-underline font-bold text-[15px] border-b border-white/10 transition-colors duration-150"
+							style={{
+								color: isActive ? "#ffffff" : "rgba(255,255,255,0.7)",
+								backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+							}}
+						>
+							{link.label}
+						</Link>
+					);
+				})}
+			</nav>
 		</header>
 	);
 }

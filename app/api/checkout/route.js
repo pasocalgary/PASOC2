@@ -6,8 +6,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  
+
   try {
+    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_BASE_URL;
     const { amount, metadata, type } = await req.json();
 
     const session = await stripe.checkout.sessions.create({
@@ -30,9 +31,9 @@ export async function POST(req) {
       ],
       metadata: { ...(metadata || {}), type: type },
       success_url: type === "donation"
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/Donate?success=true&amount=${amount}`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/success?type=${type}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/${type === "donation" ? "Donate?cancelled=true" : "login/membership"}`,
+        ? `${origin}/Donate?success=true&amount=${amount}`
+        : `${origin}/success?type=${type}`,
+      cancel_url: `${origin}/${type === "donation" ? "Donate?cancelled=true" : "login/membership"}`,
     });
 
     return NextResponse.json({ url: session.url });

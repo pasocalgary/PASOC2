@@ -26,7 +26,15 @@ export default function GuestPage() {
 
     if (res.ok) {
       setSuccess(true);
+      setError('');
       setForm({ name: "", email: "" });
+    } else {
+      const data = await res.json();
+      if (res.status === 409) {
+        setError(' This email is already registered.');
+      } else {
+        setError(` ${data.error || 'Something went wrong. Please try again.'}`);
+      }
     }
   };
 
