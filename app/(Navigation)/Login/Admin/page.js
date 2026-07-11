@@ -7,11 +7,11 @@ import { useUserAuth } from "../../../_utils/auth-context";
 import { useRouter } from "next/navigation";
 
 import { Divider } from "../Membership/components/FormUI";
-import LoginPageTemp from "../components/LoginPageTemp";
-import InputFields from "../components/InputFields";
-import PasswordField from "../components/PasswordField";
-import LoginSubmitButton from "../components/LoginSubmitButton";
-import RecaptchaWidget from "../components/RecaptchaWidget";
+import LoginPageTemp from "../UI/LoginPageTemp";
+import InputFields from "../UI/InputFields";
+import PasswordField from "../UI/PasswordField";
+import LoginSubmitButton from "../UI/LoginSubmitButton";
+import RecaptchaWidget from "../UI/RecaptchaWidget";
 import { verifyRecaptchaToken } from "../../../_utils/Recaptcha";
 
 import {

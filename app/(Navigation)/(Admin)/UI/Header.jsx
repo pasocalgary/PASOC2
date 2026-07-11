@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { User, Menu, X } from "lucide-react";
 import { useUserAuth } from "../../../_utils/auth-context";
-import PortalToggleButton from "./PortalToggleButton"
+import PortalToggleButton from "../../../_components/PortalToggleButton"
 
 const navLinks = [
 	{ label: "Overview", href: "/Dashboard" },

@@ -3,14 +3,14 @@ import { useState } from "react";
 import { useUserAuth } from '../../../_utils/auth-context';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import LoginPageTemp from "../components/LoginPageTemp";
-import InputFields from "../components/InputFields";
-import PasswordField from "../components/PasswordField";
-import LoginSubmitButton from "../components/LoginSubmitButton";
-import SocialLoginButtons from "../components/SocialLoginButtons";
+import LoginPageTemp from "../UI/LoginPageTemp";
+import InputFields from "../UI/InputFields";
+import PasswordField from "../UI/PasswordField";
+import LoginSubmitButton from "../UI/LoginSubmitButton";
+import SocialLoginButtons from "../UI/SocialLoginButtons";
 import { getFirebaseErrorMessage, validateLoginForm } from "../../../_utils/loginHelpers";
 import { Divider } from "../Membership/components/FormUI";
-import RecaptchaWidget from "../components/RecaptchaWidget";
+import RecaptchaWidget from "../UI/RecaptchaWidget";
 import { verifyRecaptchaToken } from "../../../_utils/Recaptcha"
 
 export default function LoginPage() {
