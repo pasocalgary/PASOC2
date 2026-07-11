@@ -92,7 +92,7 @@ export default function EventManagerPage() {
   // ── Load events from DB ──
   const loadEvents = useCallback(async () => {
     try {
-      const res = await fetch("/api/Database/events", { cache: "no-store" });
+      const res = await fetch("/api/events", { cache: "no-store" });
       const json = await res.json();
       if (!json.success) { console.error("Load failed:", json.error); return; }
       setEvents(json.data.map(normalise));
@@ -210,7 +210,7 @@ export default function EventManagerPage() {
 
     try {
       if (editingEvent) {
-        const res = await fetch("/api/Database/events", {
+        const res = await fetch("/api/events", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingEvent.id, ...payload }),
@@ -218,7 +218,7 @@ export default function EventManagerPage() {
         const json = await res.json();
         if (!json.success) { console.error("Update failed:", json.error); return; }
       } else {
-        const res = await fetch("/api/Database/events", {
+        const res = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -245,7 +245,7 @@ export default function EventManagerPage() {
 
   const executeConfirmedDelete = async () => {
     try {
-      const res = await fetch(`/api/Database/events?id=${confirmModal.eventId}`, { method: "DELETE" });
+      const res = await fetch(`/api/events?id=${confirmModal.eventId}`, { method: "DELETE" });
       const json = await res.json();
       if (!json.success) { console.error("Delete failed:", json.error); return; }
       closeConfirmModal();

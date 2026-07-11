@@ -17,7 +17,7 @@ export function UpcomingEventsSection() {
 				setIsLoadingEvents(true);
 				setEventsError("");
 
-				const response = await fetch("/api/Database/events", {
+				const response = await fetch("/api/events", {
 					cache: "no-store",
 				});
 				const payload = await response.json();

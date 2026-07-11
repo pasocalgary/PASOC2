@@ -49,7 +49,7 @@ export function FaqsManager() {
 					limit: String(PAGE_LIMIT),
 				});
 				const response = await fetch(
-					`/api/Database/faqs?${searchParams.toString()}`,
+					`/api/faqs?${searchParams.toString()}`,
 					{
 						cache: "no-store",
 					},
@@ -108,7 +108,7 @@ export function FaqsManager() {
 
 		try {
 			setErrorMessage("");
-			const response = await fetch("/api/Database/faqs", {
+			const response = await fetch("/api/faqs", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -155,7 +155,7 @@ export function FaqsManager() {
 
 		try {
 			setErrorMessage("");
-			const response = await fetch(`/api/Database/faqs/${id}`, {
+			const response = await fetch(`/api/faqs/${id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -253,7 +253,7 @@ export function FaqsManager() {
 	const deleteFaq = async (id) => {
 		try {
 			setErrorMessage("");
-			const response = await fetch(`/api/Database/faqs/${id}`, {
+			const response = await fetch(`/api/faqs/${id}`, {
 				method: "DELETE",
 			});
 			const data = await response.json();

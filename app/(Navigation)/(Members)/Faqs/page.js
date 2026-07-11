@@ -66,7 +66,7 @@ export default function FaqsPage() {
 					page: String(currentPage),
 					limit: String(PAGE_LIMIT),
 				});
-				const response = await fetch(`/api/Database/faqs?${searchParams.toString()}`, {
+				const response = await fetch(`/api/faqs?${searchParams.toString()}`, {
 					cache: "no-store",
 				});
 				const data = await response.json();

@@ -13,7 +13,7 @@ async function getMemberInfo(user) {
   const token = await user.getIdToken();
   const memberID = user.uid;
 
-  const res = await fetch(`/api/Database/MemberInfo?memberID=${memberID}`, {
+  const res = await fetch(`/api/member-info?memberID=${memberID}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -134,7 +134,7 @@ export default function Profile() {
     try {
       const token = await user.getIdToken();
 
-      const res = await fetch("/api/Database/MemberInfo", {
+      const res = await fetch("/api/member-info", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

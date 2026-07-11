@@ -47,7 +47,7 @@ export default function AttendanceReportPage() {
       const token = await user.getIdToken();
       const params = new URLSearchParams({ startDate: f.startDate, endDate: f.endDate });
       if (f.eventId) params.set("eventId", f.eventId);
-      const res = await fetch(`/api/Database/reports/attendance?${params}`, {
+      const res = await fetch(`/api/reports/attendance?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();

@@ -6,7 +6,7 @@ async function getOfficers() {
 		const baseURL =
 			process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-		const res = await fetch(`${baseURL}/api/Database/About`, {
+		const res = await fetch(`${baseURL}/api/about`, {
 			cache: "no-store",
 		});
 

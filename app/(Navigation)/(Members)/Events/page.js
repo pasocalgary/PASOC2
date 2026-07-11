@@ -6,9 +6,7 @@ import { EventInformation } from "../UI/EventInformation.jsx";
 
 async function getEvents() {
 	try {
-		const baseURL =
-			process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-		const res = await fetch(`${baseURL}/api/Database/events`, {
+		const res = await fetch("/api/events", {
 			cache: "no-store",
 		});
 		const data = await res.json();

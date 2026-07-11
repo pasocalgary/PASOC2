@@ -20,7 +20,7 @@ function DonateContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/Database/DonationPurposes")
+    fetch("/api/donation-purposes")
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setPurposes(data.data);

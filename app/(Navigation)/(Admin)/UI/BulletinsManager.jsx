@@ -84,7 +84,7 @@ export function BulletinManager() {
 					published: "all",
 				});
 				const response = await fetch(
-					`/api/Database/bulletins?${searchParams.toString()}`,
+					`/api/bulletins?${searchParams.toString()}`,
 					{
 						cache: "no-store",
 					},
@@ -156,7 +156,7 @@ export function BulletinManager() {
 
 		try {
 			setErrorMessage("");
-			const response = await fetch("/api/Database/bulletins", {
+			const response = await fetch("/api/bulletins", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -204,7 +204,7 @@ export function BulletinManager() {
 
 		try {
 			setErrorMessage("");
-			const response = await fetch(`/api/Database/bulletins/${id}`, {
+			const response = await fetch(`/api/bulletins/${id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -289,7 +289,7 @@ export function BulletinManager() {
 				return;
 			}
 
-			const response = await fetch(`/api/Database/bulletins/${id}`, {
+			const response = await fetch(`/api/bulletins/${id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -336,7 +336,7 @@ export function BulletinManager() {
 	const deleteBulletin = async (id) => {
 		try {
 			setErrorMessage("");
-			const response = await fetch(`/api/Database/bulletins/${id}`, {
+			const response = await fetch(`/api/bulletins/${id}`, {
 				method: "DELETE",
 			});
 			const data = await response.json();

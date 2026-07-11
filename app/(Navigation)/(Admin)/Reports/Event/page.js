@@ -63,7 +63,7 @@ export default function EventReportPage() {
       const token = await user.getIdToken();
       const params = new URLSearchParams({ startDate: f.startDate, endDate: f.endDate });
       if (f.status) params.set("status", f.status);
-      const res = await fetch(`/api/Database/reports/events?${params}`, {
+      const res = await fetch(`/api/reports/events?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();

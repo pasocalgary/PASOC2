@@ -86,11 +86,11 @@ export function SponsorsManager() {
 			let response;
 
 			if (action === "delete") {
-				response = await fetch(`/api/Database/sponsors/${sponsorId}`, {
+				response = await fetch(`/api/sponsors/${sponsorId}`, {
 					method: "DELETE",
 				});
 			} else if (action === "move") {
-				response = await fetch(`/api/Database/sponsors/${sponsorId}`, {
+				response = await fetch(`/api/sponsors/${sponsorId}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ status: "previous" }),
@@ -98,8 +98,8 @@ export function SponsorsManager() {
 			} else if (action === "add") {
 				const isEdit = Boolean(editingSponsorId);
 				const url = isEdit
-					? `/api/Database/sponsors/${editingSponsorId}`
-					: "/api/Database/sponsors";
+					? `/api/sponsors/${editingSponsorId}`
+					: "/api/sponsors";
 
 				response = await fetch(url, {
 					method: isEdit ? "PUT" : "POST",
@@ -186,7 +186,7 @@ export function SponsorsManager() {
 
 	const loadSponsors = async () => {
 		try {
-			const res = await fetch("/api/Database/sponsors", {
+			const res = await fetch("/api/sponsors", {
 				cache: "no-store",
 			});
 			if (!res.ok) {

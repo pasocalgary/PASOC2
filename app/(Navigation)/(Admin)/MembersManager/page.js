@@ -26,7 +26,7 @@ export default function ManageMembersPage() {
 
         const token = await user.getIdToken();
 
-        const res = await fetch("/api/Database/MemberInfo", {
+        const res = await fetch("/api/member-info", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

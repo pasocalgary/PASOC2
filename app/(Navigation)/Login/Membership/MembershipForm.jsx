@@ -43,7 +43,7 @@ export default function MembershipForm() {
   const [pricing, setPricing] = useState(null);
 
   useEffect(() => {
-    fetch("/api/Database/pricing")
+    fetch("/api/pricing")
       .then((res) => res.json())
       .then((data) => {
         if (data.memberPrice && data.dependantPrice) {

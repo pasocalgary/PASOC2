@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
 				const token = await firebaseUser.getIdToken();
 
                 // calls our API to get roleId from DB
-				const res = await fetch("/api/Database/auth/me", {
+				const res = await fetch("/api/auth/me", {
 					method: "GET",
 					headers: {
 						Authorization: `Bearer ${token}`,

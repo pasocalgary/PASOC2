@@ -35,7 +35,7 @@ export function EventInformation({
         const token = await user.getIdToken();
 
         const res = await fetch(
-          `/api/Database/eventRegistration?eventId=${eventId}`,
+          `/api/event-registration?eventId=${eventId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ export function EventInformation({
 
       const token = await user.getIdToken();
 
-      const res = await fetch("/api/Database/eventRegistration", {
+      const res = await fetch("/api/event-registration", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ export function EventInformation({
       const token = await user.getIdToken();
 
       const res = await fetch(
-        `/api/Database/eventRegistration?eventId=${eventId}`,
+        `/api/event-registration?eventId=${eventId}`,
         {
           method: "DELETE",
           headers: {
