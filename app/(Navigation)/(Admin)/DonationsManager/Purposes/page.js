@@ -36,7 +36,7 @@ export default function DonationPurposesPage() {
       setError(null);
       const token = await user.getIdToken();
       // Admin needs all purposes (including inactive), so we query directly
-      const res = await fetch("/api/Database/DonationPurposes?admin=true", {
+      const res = await fetch("/api/donation-purposes?admin=true", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
@@ -58,7 +58,7 @@ export default function DonationPurposesPage() {
     setAddSaving(true);
     setAddError(null);
     try {
-      const res = await fetch("/api/Database/DonationPurposes", {
+      const res = await fetch("/api/donation-purposes", {
         method: "POST",
         headers: await authHeaders(),
         body: JSON.stringify({ title: addForm.title, description: addForm.description }),
@@ -87,7 +87,7 @@ export default function DonationPurposesPage() {
     setEditSaving(true);
     setEditError(null);
     try {
-      const res = await fetch(`/api/Database/DonationPurposes/${editingId}`, {
+      const res = await fetch(`/api/donation-purposes/${editingId}`, {
         method: "PATCH",
         headers: await authHeaders(),
         body: JSON.stringify({ title: editForm.title, description: editForm.description }),
@@ -106,7 +106,7 @@ export default function DonationPurposesPage() {
   async function toggleActive(p) {
     try {
       const headers = await authHeaders();
-      await fetch(`/api/Database/DonationPurposes/${p.purposeId}`, {
+      await fetch(`/api/donation-purposes/${p.purposeId}`, {
         method: "PATCH",
         headers,
         body: JSON.stringify({ isActive: !p.isActive }),
@@ -118,7 +118,7 @@ export default function DonationPurposesPage() {
   async function handleDelete(purposeId) {
     try {
       const headers = await authHeaders();
-      await fetch(`/api/Database/DonationPurposes/${purposeId}`, {
+      await fetch(`/api/donation-purposes/${purposeId}`, {
         method: "DELETE",
         headers,
       });

@@ -63,7 +63,7 @@ export default function SponsorsPage() {
 	useEffect(() => {
 		const loadSponsors = async () => {
 			try {
-				const res = await fetch("/api/Database/sponsors", {
+				const res = await fetch("/api/sponsors", {
 					cache: "no-store",
 				});
 

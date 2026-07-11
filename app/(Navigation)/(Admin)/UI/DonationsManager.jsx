@@ -57,7 +57,7 @@ export function DonationsManager() {
       setLoading(true);
       setError(null);
       const token = await user.getIdToken();
-      const res = await fetch("/api/Database/Donations", {
+      const res = await fetch("/api/donations", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
@@ -79,7 +79,7 @@ export function DonationsManager() {
   useEffect(() => { fetchDonations(); }, [user]);
 
   useEffect(() => {
-    fetch("/api/Database/DonationPurposes")
+    fetch("/api/donation-purposes")
       .then((r) => r.json())
       .then((data) => { if (data.success) setPurposes(data.data); })
       .catch(() => {});
@@ -133,7 +133,7 @@ export function DonationsManager() {
     try {
       const token = await user.getIdToken();
       const selectedPurpose = purposes.find((p) => p.purposeId === form.purposeId);
-      const res = await fetch("/api/Database/Donations", {
+      const res = await fetch("/api/donations", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({

@@ -16,7 +16,7 @@ export default function GuestPage() {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch("/api/Guest", {
+    const res = await fetch("/api/guest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

@@ -58,7 +58,7 @@ export default function MembershipReportPage() {
     try {
       const token = await user.getIdToken();
       const params = new URLSearchParams({ startDate: f.startDate, endDate: f.endDate });
-      const res = await fetch(`/api/Database/reports/membership?${params}`, {
+      const res = await fetch(`/api/reports/membership?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();

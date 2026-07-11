@@ -63,7 +63,7 @@ export default function DonationReportPage() {
     try {
       const token = await user.getIdToken();
       const params = new URLSearchParams({ startDate: f.startDate, endDate: f.endDate });
-      const res = await fetch(`/api/Database/reports/donations?${params}`, {
+      const res = await fetch(`/api/reports/donations?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();

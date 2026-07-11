@@ -45,7 +45,7 @@ export default function Bulletin() {
 					published: "true",
 				});
 				const response = await fetch(
-					`/api/Database/bulletins?${searchParams.toString()}`,
+					`/api/bulletins?${searchParams.toString()}`,
 					{
 						cache: "no-store",
 					},

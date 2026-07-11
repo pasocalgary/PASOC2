@@ -27,7 +27,7 @@ export default function LoginPage() {
   const checkIfMember = async (firebaseUser) => {
     const token = await firebaseUser.getIdToken();
 
-    const res = await fetch("/api/Database/MemberInfo", {
+    const res = await fetch("/api/member-info", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

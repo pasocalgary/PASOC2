@@ -54,7 +54,7 @@ export async function GET(request) {
 			},
 		});
 	} catch (error) {
-		console.error("[GET /api/Database/Auth/Me]", error);
+		console.error("[GET /api/auth/me]", error);
 
 		return NextResponse.json(
 			{

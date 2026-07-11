@@ -5,7 +5,7 @@ import { useState } from "react";
 
 async function deleteMember(memberID) {
   try {
-    const res = await fetch(`/api/Database/MemberInfo?memberID=${memberID}`, {
+    const res = await fetch(`/api/member-info?memberID=${memberID}`, {
       method: "DELETE",
     });
 
