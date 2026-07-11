@@ -21,7 +21,7 @@
     "firebase-admin": "^13.7.0",
     "lucide-react": "^0.563.0",
     "mysql2": "^3.19.1",
-    "next": "16.1.6",
+    "next": "^16.2.10",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
