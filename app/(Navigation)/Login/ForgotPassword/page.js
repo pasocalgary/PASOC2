@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import LoginPageTemp from "../components/LoginPageTemp";
-import InputFields from "../components/InputFields";
-import LoginSubmitButton from "../components/LoginSubmitButton";
+import LoginPageTemp from "../UI/LoginPageTemp";
+import InputFields from "../UI/InputFields";
+import LoginSubmitButton from "../UI/LoginSubmitButton";
 import { Divider } from "../Membership/components/FormUI";
 import { useUserAuth } from "@/app/_utils/auth-context";
 import Link from "next/link";

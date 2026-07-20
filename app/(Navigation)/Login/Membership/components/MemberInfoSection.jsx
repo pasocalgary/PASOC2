@@ -1,7 +1,7 @@
 "use client";
 
 import { Field, Divider } from "./FormUI";
-import PasswordField from "../../components/PasswordField";
+import PasswordField from "../../UI/PasswordField";
 
 export default function MemberInfoSection({ form, errors, touched, REQUIRED, setField, passwordChecks }) {
   const nameFields = [
