@@ -4,6 +4,7 @@ import { HeroSection } from "@/app/(Navigation)/(Members)/UI/HeroSection";
 import { useUserAuth } from "../../../_utils/auth-context";
 import { DeletionConfirmation } from "../UI/DeletionConfirmation";
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/app/_components/Skeleton";
 import { validateField } from "../../../_utils/membershipFormValidators";
 import { sanitizeByKey, toTitleCase } from "../../../_utils/membershipFormSanitizers";
 import { GoogleAuthProvider, linkWithPopup } from "firebase/auth";
@@ -277,29 +278,29 @@ export default function Profile() {
                 <div className="space-y-1">
                   <div className={detailRowStyle}>
                     <span className={detailLabelStyle}>Name</span>
-                    <span className={detailValueStyle}>{member?.name || "Loading..."}</span>
+                    <span className={detailValueStyle}>{member?.name || <Skeleton className="h-4 w-32" />}</span>
                   </div>
                   <div className={detailRowStyle}>
                     <span className={detailLabelStyle}>Email</span>
-                    <span className={detailValueStyle}>{member?.email || "Loading..."}</span>
+                    <span className={detailValueStyle}>{member?.email || <Skeleton className="h-4 w-40" />}</span>
                   </div>
                   <div className={detailRowStyle}>
                     <span className={detailLabelStyle}>Date of Birth</span>
                     <span className={detailValueStyle}>
-                      {member?.dateOfBirth ? member.dateOfBirth.split("T")[0] : "Loading..."}
+                      {member?.dateOfBirth ? member.dateOfBirth.split("T")[0] : <Skeleton className="h-4 w-24" />}
                     </span>
                   </div>
                   <div className={detailRowStyle}>
                     <span className={detailLabelStyle}>Address</span>
-                    <span className={detailValueStyle}>{member?.address || "Loading..."}</span>
+                    <span className={detailValueStyle}>{member?.address || <Skeleton className="h-4 w-36" />}</span>
                   </div>
                   <div className={detailRowStyle}>
                     <span className={detailLabelStyle}>Postal Code</span>
-                    <span className={detailValueStyle}>{member?.postalCode || "Loading..."}</span>
+                    <span className={detailValueStyle}>{member?.postalCode || <Skeleton className="h-4 w-20" />}</span>
                   </div>
                   <div className="flex items-start justify-between gap-4 py-3">
                     <span className={detailLabelStyle}>Primary Phone</span>
-                    <span className={detailValueStyle}>{member?.primaryPhone || "Loading..."}</span>
+                    <span className={detailValueStyle}>{member?.primaryPhone || <Skeleton className="h-4 w-28" />}</span>
                   </div>
                 </div>
 

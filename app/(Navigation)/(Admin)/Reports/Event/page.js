@@ -8,6 +8,7 @@ import ReportKPICards from "../../UI/ReportKPICards";
 import ReportChart from "../../UI/ReportChart";
 import ReportDataTable from "../../UI/ReportDataTable";
 import ReportExportBar from "../../UI/ReportExportBar";
+import ReportSkeleton from "../../UI/ReportSkeleton";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All" },
@@ -125,9 +126,7 @@ export default function EventReportPage() {
             <div className="bg-red-50 border border-red-300 rounded-xl px-4 py-3 text-sm text-red-700">{error}</div>
           )}
 
-          {loading && (
-            <div className="text-center py-16 text-[#556B2F]/60 text-sm">Loading report…</div>
-          )}
+          {loading && <ReportSkeleton kpiCount={3} />}
 
           {!loading && data && (
             <>

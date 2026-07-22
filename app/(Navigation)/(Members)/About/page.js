@@ -1,4 +1,5 @@
 import { HeroSection } from "@/app/(Navigation)/(Members)/UI/HeroSection";
+import { FadeInSection } from "@/app/_components/FadeInSection";
 import Image from "next/image";
 
 async function getOfficers() {
@@ -30,9 +31,11 @@ export default async function AboutUs() {
 
 	return (
 		<main>
-			<HeroSection title="About PASOC" description=" " />
+			<FadeInSection>
+				<HeroSection title="About PASOC" description=" " />
+			</FadeInSection>
 
-			<section className="px-6 py-14">
+			<FadeInSection as="section" className="px-6 py-14">
 				<div className="max-w-6xl mx-auto grid lg:grid-cols-[1.4fr_0.8fr] gap-6 items-stretch">
 					<article className="rounded-3xl border border-[#d8d2c4] bg-[#f7f4ec] p-8 md:p-10 shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
 						<p className="inline-flex items-center rounded-full bg-[#556B2F] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white mb-5">
@@ -72,10 +75,13 @@ export default async function AboutUs() {
 						</div>
 					</aside>
 				</div>
-			</section>
+			</FadeInSection>
 
 			{/* OFFICERS */}
-			<section className="bg-neutral-100 w-full mt-12 px-6 py-14">
+			<FadeInSection
+				as="section"
+				className="bg-neutral-100 w-full mt-12 px-6 py-14"
+			>
 				<div className="max-w-6xl mx-auto">
 					<div className="text-center">
 						<p className="inline-flex items-center rounded-full bg-[#556B2F] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white mb-4">
@@ -112,7 +118,7 @@ export default async function AboutUs() {
 						))}
 					</div>
 				</div>
-			</section>
+			</FadeInSection>
 		</main>
 	);
 }

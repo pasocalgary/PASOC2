@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Search, ChevronDown, ChevronUp, Plus, X, Tag } from "lucide-react";
 import Link from "next/link";
 import { useUserAuth } from "../../../_utils/auth-context";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const PAYMENT_TYPES = ["cash", "cheque", "e-transfer", "other"];
 
@@ -187,11 +188,6 @@ export function DonationsManager() {
       </div>
 
       {/* States */}
-      {loading && (
-        <div className="flex items-center justify-center py-24 text-[#556B2F]/50 text-sm">
-          Loading donations...
-        </div>
-      )}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm">
           {error}
@@ -199,7 +195,7 @@ export function DonationsManager() {
       )}
 
       {/* Table */}
-      {!loading && !error && (
+      {!error && (
         <div className="bg-white rounded-2xl border border-[#556B2F]/10 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -220,7 +216,20 @@ export function DonationsManager() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading ? (
+                  [0, 1, 2, 3, 4, 5].map((index) => (
+                    <tr
+                      key={index}
+                      className={`border-b border-[#556B2F]/5 ${index % 2 === 0 ? "" : "bg-[#faf8f4]"}`}
+                    >
+                      {COLUMNS.map((col) => (
+                        <td key={col.key} className="px-5 py-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={COLUMNS.length} className="px-5 py-16 text-center text-[#999] text-sm">
                       No donations found.

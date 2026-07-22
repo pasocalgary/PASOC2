@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BulletinCard } from "./BulletinsCard.jsx";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const PAGE_LIMIT = 5;
 
@@ -481,7 +482,22 @@ export function BulletinManager() {
 			)}
 
 			{isLoading ? (
-				<p className="text-gray-700">Loading bulletins...</p>
+				[0, 1, 2].map((index) => (
+					<div
+						key={index}
+						className="overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.08)]"
+					>
+						<div className="flex flex-col gap-6 p-6 md:p-8">
+							<Skeleton className="h-6 w-20 rounded-full" />
+							<Skeleton className="h-9 w-2/3" />
+							<div className="flex flex-col gap-2">
+								<Skeleton className="h-5 w-full" />
+								<Skeleton className="h-5 w-full" />
+								<Skeleton className="h-5 w-1/2" />
+							</div>
+						</div>
+					</div>
+				))
 			) : bulletins.length === 0 ? (
 				<p className="text-gray-700">No bulletins found.</p>
 			) : (

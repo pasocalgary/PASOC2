@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { HeroSection } from "@/app/(Navigation)/(Members)/UI/HeroSection";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 function formatDisplayDate(value) {
 	if (!value) {
@@ -106,11 +107,23 @@ export default function Bulletin() {
 			{/* BULLETIN */}
 			<section className="bg-neutral-100 py-24 px-6">
 				<div className="max-w-6xl mx-auto flex flex-col gap-6">
-					{isLoading && (
-						<p className="text-neutral-700 leading-relaxed text-lg">
-							Loading bulletins...
-						</p>
-					)}
+					{isLoading &&
+						[0, 1, 2].map((index) => (
+							<article
+								key={index}
+								className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
+							>
+								<div className="flex flex-col gap-6 p-6 md:p-8">
+									<Skeleton className="h-9 w-2/3" />
+									<div className="flex flex-col gap-2">
+										<Skeleton className="h-5 w-full" />
+										<Skeleton className="h-5 w-full" />
+										<Skeleton className="h-5 w-1/2" />
+									</div>
+									<Skeleton className="h-3 w-40 self-end" />
+								</div>
+							</article>
+						))}
 
 					{!isLoading && errorMessage && (
 						<p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">

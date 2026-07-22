@@ -6,6 +6,7 @@ import { HeroSection } from "./(Navigation)/(Members)/UI/HeroSection";
 import { FloatingButton } from "./(Navigation)/(Members)/UI/FloatingButton";
 import { LatestBulletinsSection } from "./(Navigation)/(Members)/UI/LatestBulletinsSection";
 import { UpcomingEventsSection } from "./(Navigation)/(Members)/UI/UpcomingEventsSection";
+import { FadeInSection } from "./_components/FadeInSection";
 import { useUserAuth } from "./_utils/auth-context";
 
 export default function HomePage() {
@@ -18,16 +19,25 @@ export default function HomePage() {
 			<FloatingButton />
 
 			{/* HERO */}
-			<HeroSection
-				title="Welcome to PASOC!"
-				description="Explore our community, stay informed on upcoming events, and get involved. Become a full member to access all that PASOC has to offer, or sign up for our newsletter to stay connected with community news and announcements."
-			/>
+			<FadeInSection>
+				<HeroSection
+					title="Welcome to PASOC!"
+					description="Explore our community, stay informed on upcoming events, and get involved. Become a full member to access all that PASOC has to offer, or sign up for our newsletter to stay connected with community news and announcements."
+				/>
+			</FadeInSection>
 
-			<LatestBulletinsSection />
-			<UpcomingEventsSection />
+			<FadeInSection>
+				<LatestBulletinsSection />
+			</FadeInSection>
+			<FadeInSection>
+				<UpcomingEventsSection />
+			</FadeInSection>
 
 			{/* SCHOLARSHIP FEATURE */}
-			<section className="bg-white py-32 px-6 text-neutral-900">
+			<FadeInSection
+				as="section"
+				className="bg-white py-32 px-6 text-neutral-900"
+			>
 				<div className="max-w-3xl mx-auto text-center flex flex-col gap-8">
 					<h2 className="text-4xl font-bold text-primary-700">
 						Scholarship & Bursary Program
@@ -44,10 +54,13 @@ export default function HomePage() {
 						Learn More & Apply
 					</button>
 				</div>
-			</section>
+			</FadeInSection>
 
 			{/* ABOUT */}
-			<section className="bg-primary-600 py-24 px-6">
+			<FadeInSection
+				as="section"
+				className="bg-primary-600 py-24 px-6"
+			>
 				<div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
 					<div
 						className="flex flex-col gap-6"
@@ -74,10 +87,13 @@ export default function HomePage() {
 						className="w-full h-105 object-cover rounded-2xl bg-gray-300 shadow-[0_20px_50px_rgba(0,0,0,0.08)]"
 					/>
 				</div>
-			</section>
+			</FadeInSection>
 
 			{/* CTA */}
-			<section className="bg-neutral-100 py-36 px-6 text-neutral-900">
+			<FadeInSection
+				as="section"
+				className="bg-neutral-100 py-36 px-6 text-neutral-900"
+			>
 				<div className="max-w-3xl mx-auto text-center flex flex-col gap-8">
 					<h2 className="text-4xl font-bold">
 						Join the PASOC Community
@@ -107,7 +123,7 @@ export default function HomePage() {
 						)
 					)}
 				</div>
-			</section>
+			</FadeInSection>
 		</main>
 	);
 }

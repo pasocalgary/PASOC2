@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const PRESET_AMOUNTS = [5, 10, 20, 50, 100, 150];
 
@@ -235,9 +236,30 @@ function DonateContent() {
   );
 }
 
+function DonateSkeleton() {
+  return (
+    <main className="max-w-2xl mx-auto px-6 py-10">
+      <Skeleton className="h-10 w-40 mb-8" />
+      <div className="bg-gray-50 border border-gray-300 rounded-xl p-6 flex flex-col gap-6">
+        <div>
+          <Skeleton className="h-4 w-40 mb-3" />
+          <div className="flex flex-wrap gap-2">
+            {PRESET_AMOUNTS.map((amt) => (
+              <Skeleton key={amt} className="h-8 w-16 rounded-full" />
+            ))}
+          </div>
+        </div>
+        <Skeleton className="h-11 w-full rounded-lg" />
+        <Skeleton className="h-11 w-full rounded-lg" />
+        <Skeleton className="h-11 w-full rounded-lg" />
+      </div>
+    </main>
+  );
+}
+
 export default function Donate() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-neutral-500">Loading...</div>}>
+    <Suspense fallback={<DonateSkeleton />}>
       <DonateContent />
     </Suspense>
   );

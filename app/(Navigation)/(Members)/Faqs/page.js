@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { HeroSection } from "../UI/HeroSection.jsx";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const PAGE_LIMIT = 5;
 
@@ -28,19 +30,30 @@ function FaqItem({ question, answer }) {
 				</button>
 			</div>
 
-			{isOpen && (
-				<div className="mt-3 border-t border-gray-300 pt-4">
-					{answerLines.length > 1 ? (
-						<ul className="list-disc pl-6 space-y-1 text-lg text-black">
-							{answerLines.map((line, index) => (
-								<li key={index}>{line}</li>
-							))}
-						</ul>
-					) : (
-						<p className="text-lg text-black">{answer}</p>
-					)}
-				</div>
-			)}
+			<AnimatePresence initial={false}>
+				{isOpen && (
+					<motion.div
+						key="answer"
+						initial={{ height: 0, opacity: 0 }}
+						animate={{ height: "auto", opacity: 1 }}
+						exit={{ height: 0, opacity: 0 }}
+						transition={{ duration: 0.2, ease: "easeInOut" }}
+						className="overflow-hidden"
+					>
+						<div className="mt-3 border-t border-gray-300 pt-4">
+							{answerLines.length > 1 ? (
+								<ul className="list-disc pl-6 space-y-1 text-lg text-black">
+									{answerLines.map((line, index) => (
+										<li key={index}>{line}</li>
+									))}
+								</ul>
+							) : (
+								<p className="text-lg text-black">{answer}</p>
+							)}
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</article>
 	);
 }
@@ -123,7 +136,17 @@ export default function FaqsPage() {
 					<p className="text-red-700 font-medium">{errorMessage}</p>
 				)}
 				{isLoading ? (
-					<p className="text-gray-700">Loading FAQs...</p>
+					[0, 1, 2, 3, 4].map((index) => (
+						<div
+							key={index}
+							className="w-full rounded-2xl border border-gray-300 bg-[#f3f4f6] px-6 py-4 shadow-sm"
+						>
+							<div className="flex items-center justify-between gap-3">
+								<Skeleton className="h-6 w-2/3" />
+								<Skeleton className="h-6 w-6 shrink-0 rounded-full" />
+							</div>
+						</div>
+					))
 				) : !errorMessage && faqs.length === 0 ? (
 					<p className="text-gray-700">No FAQs found.</p>
 				) : (

@@ -31,7 +31,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${workSans.variable} ${instrumentSerif.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <div className={"min-h-screen bg-[#f0ece1] flex flex-col"}>
           <AuthProvider>
             <ClientLayoutGuard>

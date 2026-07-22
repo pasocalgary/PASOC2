@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Tag, Plus, X, Pencil, Trash2, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useUserAuth } from "../../../../_utils/auth-context";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const EMPTY_FORM = { title: "", description: "" };
 
@@ -221,7 +222,17 @@ export default function DonationPurposesPage() {
 
         {/* States */}
         {loading && (
-          <div className="text-center py-24 text-[#556B2F]/50 text-sm">Loading purposes...</div>
+          <div className="flex flex-col gap-3">
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl border border-[#556B2F]/10 px-5 py-4"
+              >
+                <Skeleton className="h-5 w-40 mb-2" />
+                <Skeleton className="h-3 w-64" />
+              </div>
+            ))}
+          </div>
         )}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm">{error}</div>
