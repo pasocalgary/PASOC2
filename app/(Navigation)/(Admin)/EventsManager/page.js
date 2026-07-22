@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { CalendarDays } from "lucide-react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { CalendarDays, Clock, MapPin, Image as ImageIcon, Link2, AlignLeft, Upload, X } from "lucide-react";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -23,16 +23,22 @@ function dayName(y, m, d) {
 // Convert DB row → local event object
 function normalise(row) {
   const dt = row.startDatetime ? new Date(row.startDatetime) : null;
+  const endDt = row.endDatetime ? new Date(row.endDatetime) : null;
   return {
     id: row.eventId,
     title: row.title ?? "",
     startDatetime: row.startDatetime ?? "",
+    endDatetime: row.endDatetime ?? "",
     description: row.description ?? "",
     location: row.location ?? "",
+    link: row.link ?? "",
+    imageUrl: row.imageUrl ?? "",
     // derived for calendar / display
     date: dt ? formatDateStr(dt.getFullYear(), dt.getMonth(), dt.getDate()) : "",
     time: dt ? `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}` : "",
     timeDisplay: dt ? formatTimeDisplay(`${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`) : "",
+    endTime: endDt ? `${String(endDt.getHours()).padStart(2, "0")}:${String(endDt.getMinutes()).padStart(2, "0")}` : "",
+    endTimeDisplay: endDt ? formatTimeDisplay(`${String(endDt.getHours()).padStart(2, "0")}:${String(endDt.getMinutes()).padStart(2, "0")}`) : "",
   };
 }
 
@@ -85,9 +91,76 @@ export default function EventManagerPage() {
 
   // Form uses separate date + time inputs for usability, combined into startDatetime on submit
   const [formData, setFormData] = useState({
-    title: "", date: "", time: "", description: "", location: "",
+    title: "", date: "", time: "", endTime: "", description: "", location: "", link: "", imageUrl: "",
   });
   const [formError, setFormError] = useState("");
+
+  // Location autocomplete (LocationIQ, proxied through /api/geocode)
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const suppressNextLocationFetch = useRef(false);
+
+  useEffect(() => {
+    if (suppressNextLocationFetch.current) {
+      suppressNextLocationFetch.current = false;
+      return;
+    }
+    const query = formData.location;
+    if (!query || query.trim().length < 3) {
+      setLocationSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+        const json = await res.json();
+        if (json.success) {
+          setLocationSuggestions(json.data);
+          setShowLocationSuggestions(true);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [formData.location]);
+
+  const handleSelectLocation = (displayName) => {
+    suppressNextLocationFetch.current = true;
+    updateField("location", displayName);
+    setLocationSuggestions([]);
+    setShowLocationSuggestions(false);
+  };
+
+  // Local preview until submit, when the file is uploaded to R2 (see handleSubmit)
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (!imageFile) { setImagePreviewUrl(""); return; }
+    const url = URL.createObjectURL(imageFile);
+    setImagePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  const displayImage = imagePreviewUrl || formData.imageUrl;
+
+  const handleImageFiles = (files) => {
+    const file = files?.[0];
+    if (file && file.type.startsWith("image/")) setImageFile(file);
+  };
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
+  const handleImageDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleImageFiles(e.dataTransfer.files);
+  };
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    updateField("imageUrl", "");
+  };
 
   // ── Load events from DB ──
   const loadEvents = useCallback(async () => {
@@ -162,20 +235,27 @@ export default function EventManagerPage() {
   };
 
   const openForm = (ev = null) => {
+    suppressNextLocationFetch.current = true;
+    setLocationSuggestions([]);
+    setShowLocationSuggestions(false);
     if (ev) {
       // editing — split startDatetime back into date + time inputs
       setFormData({
         title: ev.title,
         date: ev.date,
         time: ev.time,   // already HH:MM from normalise()
+        endTime: ev.endTime,
         description: ev.description,
         location: ev.location,
+        link: ev.link,
+        imageUrl: ev.imageUrl,
       });
       setEditingEvent(ev);
     } else {
-      setFormData({ title: "", date: selectedDate, time: "", description: "", location: "" });
+      setFormData({ title: "", date: selectedDate, time: "", endTime: "", description: "", location: "", link: "", imageUrl: "" });
       setEditingEvent(null);
     }
+    setImageFile(null);
     setFormError("");
     setShowForm(true);
   };
@@ -191,6 +271,7 @@ export default function EventManagerPage() {
     if (!data.date) return "Date is required.";
     if (!data.time) return "Time is required.";
     if (!data.location.trim()) return "Location is required.";
+    if (data.endTime && data.endTime <= data.time) return "End time must be after start time.";
     return "";
   };
 
@@ -200,12 +281,33 @@ export default function EventManagerPage() {
     const error = getFormError(formData);
     if (error) { setFormError(error); return; }
     setFormError("");
+
+    let imageUrl = formData.imageUrl;
+    if (imageFile) {
+      try {
+        const uploadForm = new FormData();
+        uploadForm.append("file", imageFile);
+        const uploadRes = await fetch("/api/events/upload", { method: "POST", body: uploadForm });
+        const uploadJson = await uploadRes.json();
+        if (!uploadJson.success) { setFormError(uploadJson.error || "Image upload failed."); return; }
+        imageUrl = uploadJson.url;
+      } catch (err) {
+        console.error(err);
+        setFormError("Image upload failed.");
+        return;
+      }
+    }
+
     const startDatetime = toDatetimeLocal(formData.date, formData.time);
+    const endDatetime = formData.endTime ? toDatetimeLocal(formData.date, formData.endTime) : null;
     const payload = {
       title: formData.title,
       startDatetime,
+      endDatetime,
       description: formData.description,
       location: formData.location,
+      link: formData.link,
+      imageUrl,
     };
 
     try {
@@ -411,65 +513,169 @@ export default function EventManagerPage() {
 
         {/* Event Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <form
-              className="bg-white border-2 border-[#556B2F] rounded-xl shadow-lg p-6 sm:p-8 flex flex-col gap-4 w-full max-w-sm mx-4"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto flex flex-col max-h-[90vh]"
               onSubmit={handleSubmit}
             >
-              <h2 className="text-2xl font-bold text-[#556B2F] mb-2">
-                {editingEvent ? "Edit Event" : "Add Event"}
-              </h2>
-              {formError && (
-                <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {formError}
-                </p>
-              )}
-              <input
-                className="border border-[#556B2F] rounded px-3 py-2 text-[#2a2420] focus:outline-none focus:border-[#6b8e23]"
-                placeholder="Event Title"
-                value={formData.title}
-                onChange={(e) => updateField("title", e.target.value)}
-                required
-              />
-              <input
-                className="border border-[#556B2F] rounded px-3 py-2 text-[#2a2420] focus:outline-none focus:border-[#6b8e23]"
-                type="date"
-                value={formData.date}
-                onChange={(e) => updateField("date", e.target.value)}
-                required
-              />
-              <input
-                className="border border-[#556B2F] rounded px-3 py-2 text-[#2a2420] focus:outline-none focus:border-[#6b8e23]"
-                type="time"
-                value={formData.time}
-                onChange={(e) => updateField("time", e.target.value)}
-                required
-              />
-              <input
-                className="border border-[#556B2F] rounded px-3 py-2 text-[#2a2420] focus:outline-none focus:border-[#6b8e23]"
-                placeholder="Location"
-                value={formData.location}
-                onChange={(e) => updateField("location", e.target.value)}
-                required
-              />
-              <textarea
-                className="border border-[#556B2F] rounded px-3 py-2 text-[#2a2420] focus:outline-none focus:border-[#6b8e23] resize-none"
-                placeholder="Description"
-                rows={3}
-                value={formData.description}
-                onChange={(e) => updateField("description", e.target.value)}
-              />
-              <div className="flex gap-3 mt-2">
+              <div className="flex items-center justify-between px-6 pt-5 pb-2">
+                <input
+                  className="flex-1 text-2xl font-medium text-[#2a2420] placeholder-gray-400 border-b-2 border-transparent focus:border-[#556B2F] outline-none pb-1"
+                  placeholder="Add title"
+                  value={formData.title}
+                  onChange={(e) => updateField("title", e.target.value)}
+                  required
+                />
                 <button
-                  type="submit"
-                  className="bg-[#556B2F] hover:bg-[#6b8e23] text-white font-semibold px-4 py-2 rounded transition flex-1"
+                  type="button"
+                  className="text-gray-400 hover:text-gray-600 ml-3"
+                  onClick={() => setShowForm(false)}
+                  aria-label="Close"
                 >
-                  {editingEvent ? "Save" : "Add"}
+                  <X size={22} />
                 </button>
+              </div>
+
+              <div className="px-6 pb-4 flex flex-col gap-4 overflow-y-auto">
+                {formError && (
+                  <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {formError}
+                  </p>
+                )}
+
+                {/* Date & time */}
+                <div className="flex items-start gap-4">
+                  <Clock size={20} className="text-gray-500 mt-1.5 shrink-0" />
+                  <div className="flex flex-wrap items-center gap-2 flex-1">
+                    <input
+                      className="border border-gray-300 rounded px-2 py-1.5 text-sm text-[#2a2420] focus:outline-none focus:border-[#556B2F]"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => updateField("date", e.target.value)}
+                      required
+                    />
+                    <input
+                      className="border border-gray-300 rounded px-2 py-1.5 text-sm text-[#2a2420] focus:outline-none focus:border-[#556B2F]"
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => updateField("time", e.target.value)}
+                      required
+                    />
+                    <span className="text-gray-400">–</span>
+                    <input
+                      className="border border-gray-300 rounded px-2 py-1.5 text-sm text-[#2a2420] focus:outline-none focus:border-[#556B2F]"
+                      type="time"
+                      value={formData.endTime}
+                      onChange={(e) => updateField("endTime", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="flex items-center gap-4 relative">
+                  <MapPin size={20} className="text-gray-500 shrink-0" />
+                  <div className="flex-1 relative">
+                    <input
+                      className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-[#2a2420] focus:outline-none focus:border-[#556B2F]"
+                      placeholder="Add location"
+                      value={formData.location}
+                      onChange={(e) => updateField("location", e.target.value)}
+                      onFocus={() => { if (locationSuggestions.length > 0) setShowLocationSuggestions(true); }}
+                      onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+                      autoComplete="off"
+                      required
+                    />
+                    {showLocationSuggestions && locationSuggestions.length > 0 && (
+                      <ul className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-56 overflow-y-auto">
+                        {locationSuggestions.map((s, i) => {
+                          const [primary, ...rest] = s.displayName.split(",");
+                          const secondary = rest.join(",").trim();
+                          return (
+                            <li
+                              key={`${s.placeId}-${i}`}
+                              onMouseDown={() => handleSelectLocation(s.displayName)}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                              <div className="text-sm font-medium text-[#2a2420]">{primary}</div>
+                              {secondary && <div className="text-xs text-gray-500">{secondary}</div>}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                {/* Image: drag & drop / click to browse */}
+                <div className="flex items-start gap-4">
+                  <ImageIcon size={20} className="text-gray-500 mt-1.5 shrink-0" />
+                  <div className="flex-1">
+                    {!displayImage ? (
+                      <label
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleImageDrop}
+                        className={`flex flex-col items-center justify-center gap-1 border-2 border-dashed rounded-lg py-6 px-3 text-center cursor-pointer transition ${
+                          isDragging ? "border-[#556B2F] bg-[#f0f5e8]" : "border-gray-300 hover:border-[#556B2F]"
+                        }`}
+                      >
+                        <Upload size={20} className="text-gray-400" />
+                        <span className="text-sm text-gray-500">Drag & drop an image, or click to browse</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageFiles(e.target.files)}
+                        />
+                      </label>
+                    ) : (
+                      <div className="relative rounded-lg overflow-hidden border border-gray-200 w-full h-32">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={displayImage} alt="Event" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-1.5 right-1.5 bg-white/90 hover:bg-white rounded-full p-1 shadow"
+                          aria-label="Remove image"
+                        >
+                          <X size={14} className="text-gray-700" />
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">Uploads on save. Max 5MB.</p>
+                  </div>
+                </div>
+
+                {/* Link */}
+                <div className="flex items-center gap-4">
+                  <Link2 size={20} className="text-gray-500 shrink-0" />
+                  <input
+                    className="flex-1 border-b border-gray-200 focus:border-[#556B2F] outline-none py-1.5 text-sm text-[#2a2420]"
+                    type="url"
+                    placeholder="Add link (optional)"
+                    value={formData.link}
+                    onChange={(e) => updateField("link", e.target.value)}
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="flex items-start gap-4">
+                  <AlignLeft size={20} className="text-gray-500 mt-1.5 shrink-0" />
+                  <textarea
+                    className="flex-1 border-b border-gray-200 focus:border-[#556B2F] outline-none py-1.5 text-sm text-[#2a2420] resize-none"
+                    placeholder="Add description"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => updateField("description", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-100">
                 {editingEvent && (
                   <button
                     type="button"
-                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded transition"
+                    className="text-red-600 hover:bg-red-50 font-semibold px-3 py-2 rounded text-sm transition"
                     onClick={handleDelete}
                   >
                     Delete
@@ -477,10 +683,16 @@ export default function EventManagerPage() {
                 )}
                 <button
                   type="button"
-                  className="bg-[#f0ece1] border border-[#556B2F] text-[#556B2F] font-semibold px-4 py-2 rounded transition hover:bg-[#e6e2d3]"
+                  className="text-[#556B2F] hover:bg-gray-100 font-semibold px-4 py-2 rounded text-sm transition"
                   onClick={() => setShowForm(false)}
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#556B2F] hover:bg-[#6b8e23] text-white font-semibold px-5 py-2 rounded-full text-sm transition"
+                >
+                  {editingEvent ? "Save" : "Add"}
                 </button>
               </div>
             </form>

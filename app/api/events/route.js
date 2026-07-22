@@ -40,7 +40,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { title, startDatetime, description, location } = body;
+    const { title, startDatetime, endDatetime, description, location, link, imageUrl } = body;
 
     if (!title || !startDatetime) {
       return NextResponse.json(
@@ -50,9 +50,9 @@ export async function POST(request) {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO Events (title, startDatetime, description, location)
-       VALUES (?, ?, ?, ?)`,
-      [title, startDatetime, description || null, location || null]
+      `INSERT INTO Events (title, startDatetime, endDatetime, description, location, link, imageUrl)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [title, startDatetime, endDatetime || null, description || null, location || null, link || null, imageUrl || null]
     );
 
     return NextResponse.json({
@@ -72,7 +72,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, title, startDatetime, description, location } = body;
+    const { id, title, startDatetime, endDatetime, description, location, link, imageUrl } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -86,8 +86,11 @@ export async function PUT(request) {
 
     if (title !== undefined) { fields.push("title = ?"); values.push(title); }
     if (startDatetime !== undefined) { fields.push("startDatetime = ?"); values.push(startDatetime); }
+    if (endDatetime !== undefined) { fields.push("endDatetime = ?"); values.push(endDatetime || null); }
     if (description !== undefined) { fields.push("description = ?"); values.push(description); }
     if (location !== undefined) { fields.push("location = ?"); values.push(location); }
+    if (link !== undefined) { fields.push("link = ?"); values.push(link || null); }
+    if (imageUrl !== undefined) { fields.push("imageUrl = ?"); values.push(imageUrl || null); }
 
     if (fields.length === 0) {
       return NextResponse.json(
