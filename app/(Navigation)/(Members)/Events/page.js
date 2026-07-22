@@ -55,13 +55,23 @@ export default function Events() {
 				eventId: event.eventId,
 				title: event.title,
 				datetime: event.startDatetime,
+				startDatetime: event.startDatetime,
+				endDatetime: event.endDatetime,
 				date: new Date(event.startDatetime).toLocaleDateString(),
 				time: new Date(event.startDatetime).toLocaleTimeString([], {
 					hour: "numeric",
 					minute: "2-digit",
 				}),
+				endTime: event.endDatetime
+					? new Date(event.endDatetime).toLocaleTimeString([], {
+						hour: "numeric",
+						minute: "2-digit",
+					})
+					: "",
 				description: event.description,
 				location: event.location,
+				link: event.link,
+				imageUrl: event.imageUrl,
 			});
 		}
 
@@ -80,13 +90,23 @@ export default function Events() {
 					eventId: event.eventId,
 					title: event.title,
 					datetime: start,
+					startDatetime: event.startDatetime,
+					endDatetime: event.endDatetime,
 					date: start.toLocaleDateString(),
 					time: start.toLocaleTimeString([], {
 						hour: "numeric",
 						minute: "2-digit",
 					}),
+					endTime: event.endDatetime
+						? new Date(event.endDatetime).toLocaleTimeString([], {
+							hour: "numeric",
+							minute: "2-digit",
+						})
+						: "",
 					description: event.description,
 					location: event.location,
+					link: event.link,
+					imageUrl: event.imageUrl,
 				};
 			})
 			.filter(
@@ -273,8 +293,13 @@ export default function Events() {
 						title={selectedEvent.title}
 						date={selectedEvent.date}
 						time={selectedEvent.time}
+						endTime={selectedEvent.endTime}
 						description={selectedEvent.description}
 						location={selectedEvent.location}
+						link={selectedEvent.link}
+						imageUrl={selectedEvent.imageUrl}
+						startDatetime={selectedEvent.startDatetime}
+						endDatetime={selectedEvent.endDatetime}
 						onClose={() => setSelectedEvent(null)}
 					/>
 				)}
