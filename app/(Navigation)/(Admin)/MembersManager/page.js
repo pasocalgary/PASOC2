@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Users, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useUserAuth } from "../../../_utils/auth-context";
 import Link from "next/link";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 export default function ManageMembersPage() {
   const { user } = useUserAuth();
@@ -148,7 +149,11 @@ export default function ManageMembersPage() {
           <div>
             <h1 className="text-3xl font-serif text-[#556B2F]">Members</h1>
             <p className="text-sm text-[#556B2F]/60 mt-0.5">
-              {loading ? "Loading..." : `${filtered.length} of ${members.length} members`}
+              {loading ? (
+                <Skeleton className="h-4 w-32" />
+              ) : (
+                `${filtered.length} of ${members.length} members`
+              )}
             </p>
           </div>
         </div>
@@ -176,12 +181,6 @@ export default function ManageMembersPage() {
         </div>
 
         {/* States */}
-        {loading && (
-          <div className="flex items-center justify-center py-24 text-[#556B2F]/50 text-sm">
-            Loading members...
-          </div>
-        )}
-
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm">
             {error}
@@ -197,7 +196,7 @@ export default function ManageMembersPage() {
         )}
 
         {/* Table */}
-        {!loading && !error && (
+        {!error && (
           <div className="bg-white rounded-2xl border border-[#556B2F]/10 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -218,7 +217,20 @@ export default function ManageMembersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.length === 0 ? (
+                  {loading ? (
+                    [0, 1, 2, 3, 4, 5].map((index) => (
+                      <tr
+                        key={index}
+                        className={`border-b border-[#556B2F]/5 ${index % 2 === 0 ? "" : "bg-[#faf8f4]"}`}
+                      >
+                        {columns.map((col) => (
+                          <td key={col.key} className="px-5 py-4">
+                            <Skeleton className="h-4 w-20" />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : filtered.length === 0 ? (
                     <tr>
                       <td colSpan={columns.length} className="px-5 py-16 text-center text-[#999] text-sm">
                         No members found.

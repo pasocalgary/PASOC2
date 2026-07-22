@@ -1,3 +1,4 @@
+// Originally located at: app/(Navigation)/(Members)/UI/ReadMoreNews.jsx
 import React from 'react';
 
 export function ReadMore({ Title, Description, onCancel }) {

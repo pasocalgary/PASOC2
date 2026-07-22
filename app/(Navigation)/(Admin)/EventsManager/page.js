@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { CalendarDays, Clock, MapPin, Image as ImageIcon, Link2, AlignLeft, Upload, X } from "lucide-react";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -387,7 +388,17 @@ export default function EventManagerPage() {
               <h3 className="font-serif text-xl text-center underline underline-offset-4 font-semibold text-[#2a2420] mb-4">
                 Upcoming Events
               </h3>
-              {loading && <p className="text-sm text-[#888] text-center mt-8">Loading events...</p>}
+              {loading && (
+                <div className="flex flex-col gap-1">
+                  {[0, 1, 2].map((index) => (
+                    <div key={index} className="border-b border-[#ccc] py-3 px-2">
+                      <Skeleton className="h-4 w-2/3 mb-2" />
+                      <Skeleton className="h-3 w-full mb-1" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              )}
               {!loading && upcomingEvents.length === 0 && (
                 <p className="text-sm text-[#888] text-center mt-8">No upcoming events.</p>
               )}

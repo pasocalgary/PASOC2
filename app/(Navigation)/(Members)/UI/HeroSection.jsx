@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import { useUserAuth } from "../../../_utils/auth-context";
 
 export function HeroSection({ title, description }) {
@@ -34,33 +35,41 @@ export function HeroSection({ title, description }) {
 					{description}
 				</p>
 
-				{showButtons && !loading && (
-					<div className="flex flex-wrap gap-3 mt-5 sm:gap-4 sm:mt-7 text-[16px] sm:text-[20px] font-semibold text-black">
-						{isMember ? (
-							<Link
-								href="/Events"
-								className="flex items-center justify-center py-2 px-5 sm:py-3 sm:px-8 rounded-full bg-[#f3f4f6] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-white"
-							>
-								View Events
-							</Link>
-						) : (
-							<>
+				<AnimatePresence>
+					{showButtons && !loading && (
+						<motion.div
+							initial={{ opacity: 0, y: 12 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 12 }}
+							transition={{ duration: 0.3, ease: "easeOut" }}
+							className="flex flex-wrap gap-3 mt-5 sm:gap-4 sm:mt-7 text-[16px] sm:text-[20px] font-semibold text-black"
+						>
+							{isMember ? (
 								<Link
-									href="/Login/Membership"
+									href="/Events"
 									className="flex items-center justify-center py-2 px-5 sm:py-3 sm:px-8 rounded-full bg-[#f3f4f6] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-white"
 								>
-									Become a Member
+									View Events
 								</Link>
-								<Link
-									href="/Guest"
-									className="flex items-center justify-center py-2 px-5 sm:py-3 sm:px-8 rounded-full bg-[#f3f4f6] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-white"
-								>
-									Join Newsletter
-								</Link>
-							</>
-						)}
-					</div>
-				)}
+							) : (
+								<>
+									<Link
+										href="/Login/Membership"
+										className="flex items-center justify-center py-2 px-5 sm:py-3 sm:px-8 rounded-full bg-[#f3f4f6] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-white"
+									>
+										Become a Member
+									</Link>
+									<Link
+										href="/Guest"
+										className="flex items-center justify-center py-2 px-5 sm:py-3 sm:px-8 rounded-full bg-[#f3f4f6] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-white"
+									>
+										Join Newsletter
+									</Link>
+								</>
+							)}
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</div>
 		</section>
 	);

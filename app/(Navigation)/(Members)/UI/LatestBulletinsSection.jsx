@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 export function LatestBulletinsSection() {
 	const router = useRouter();
@@ -184,9 +185,22 @@ export function LatestBulletinsSection() {
 				</div>
 
 				{isLoadingBulletins && (
-					<p className="text-neutral-700">
-						Loading latest bulletins...
-					</p>
+					<div className="grid gap-8 px-2 md:grid-cols-3 md:px-14">
+						{[0, 1, 2].map((index) => (
+							<div
+								key={index}
+								className="bg-neutral-100 p-8 rounded-2xl"
+							>
+								<Skeleton className="h-6 w-3/4 mb-4" />
+								<div className="flex flex-col gap-2 mb-6">
+									<Skeleton className="h-4 w-full" />
+									<Skeleton className="h-4 w-full" />
+									<Skeleton className="h-4 w-2/3" />
+								</div>
+								<Skeleton className="h-4 w-24" />
+							</div>
+						))}
+					</div>
 				)}
 
 				{!isLoadingBulletins && bulletinsError && (

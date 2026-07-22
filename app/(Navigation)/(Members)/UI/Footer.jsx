@@ -25,7 +25,7 @@ export function Footer() {
 					For any site issues and inquires: <br />
 					Email{" "}
 					<a href="mailto:dgsv0508@yahoo.ca" className="underline">
-						dgsv0508@yahoo.ca
+						pasocalgary@gmail.com
 					</a>
 				</div>
 			</div>

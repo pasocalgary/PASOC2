@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FaqsCard } from "./FaqsCard.jsx";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 const PAGE_LIMIT = 5;
 
@@ -382,7 +383,17 @@ export function FaqsManager() {
 			)}
 
 			{isLoading ? (
-				<p className="text-gray-700">Loading FAQs...</p>
+				[0, 1, 2, 3, 4].map((index) => (
+					<div key={index} className="flex items-center gap-3">
+						<div className="flex-1 rounded-2xl border border-gray-300 bg-[#f3f4f6] px-6 py-4 shadow-sm">
+							<Skeleton className="h-6 w-2/3" />
+						</div>
+						<div className="flex shrink-0 flex-row gap-2">
+							<Skeleton className="h-9 w-16" />
+							<Skeleton className="h-9 w-16" />
+						</div>
+					</div>
+				))
 			) : faqs.length === 0 ? (
 				<p className="text-gray-700">No FAQs found.</p>
 			) : (

@@ -15,6 +15,7 @@ import { getPasswordChecks, validateField, validateAll } from "../../../_utils/m
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../_utils/firebase";
+import { Skeleton } from "@/app/_components/Skeleton";
 
 // ─── Age helper (no pricing dependency — safe outside component) ──────────────
 const getAge = (birthday) => {
@@ -331,8 +332,17 @@ if (Object.keys(moderationData.moderationErrors).length > 0) {
   // GUARD: don't render form until pricing is loaded
   if (!pricing) {
     return (
-      <main className="min-h-dvh bg-[#F4EFE7] flex items-center justify-center">
-        <p className="text-[#556B2F] text-sm">Loading membership pricing...</p>
+      <main className="min-h-dvh bg-[#F4EFE7] px-4 flex justify-center items-start md:items-center py-10">
+        <div className="w-full max-w-160 bg-white/40 rounded-2xl p-6 sm:p-8 shadow-sm border border-black/10 flex flex-col gap-4">
+          <Skeleton className="h-9 w-2/3 mx-auto" />
+          <Skeleton className="h-4 w-1/2 mx-auto" />
+          <div className="mt-4 flex flex-col gap-3">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-12 w-full rounded-xl mt-2" />
+        </div>
       </main>
     );
   }

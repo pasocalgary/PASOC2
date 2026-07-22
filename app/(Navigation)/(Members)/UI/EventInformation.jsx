@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserAuth } from "@/app/_utils/auth-context";
+import { Skeleton } from "@/app/_components/Skeleton";
 import { useEffect, useRef, useState } from "react";
 import {
   buildGoogleCalendarUrl,
@@ -329,7 +330,7 @@ export function EventInformation({
             {isLoggedIn ? (
               <div className="mt-4 flex flex-col gap-2">
                 {checking ? (
-                  <p className="text-sm text-gray-500">Checking registration...</p>
+                  <Skeleton className="h-9 w-full rounded-lg" />
                 ) : isRegistered ? (
                   <button
                     onClick={handleCancel}
