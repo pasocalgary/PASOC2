@@ -16,17 +16,17 @@ export const MODERATED_FIELDS = new Set([
 ]);
 
 const DEFAULT_THRESHOLDS = {
-  Hate: 1,
-  Sexual: 1,
-  Violence: 1,
-  SelfHarm: 1,
+  Hate: 4,
+  Sexual: 4,
+  Violence: 4,
+  SelfHarm: 4,
 };
 
 const NAME_FIELD_THRESHOLDS = {
-  Hate: 1,
-  Sexual: 1,
-  Violence: 1,
-  SelfHarm: 1,
+  Hate: 4,
+  Sexual: 4,
+  Violence: 4,
+  SelfHarm: 4,
 };
 
 let cachedClient = null;
@@ -68,8 +68,9 @@ export function shouldModerateField(key) {
   return MODERATED_FIELDS.has(key);
 }
 
-export async function analyzeTextSafety(text) {
+export async function analyzeTextSafety(text, options = {}) {
   const value = typeof text === "string" ? text.trim() : "";
+  const thresholds = { ...DEFAULT_THRESHOLDS, ...(options.thresholds ?? {}) };
 
   if (!value) {
     return {
@@ -120,8 +121,9 @@ export async function analyzeTextSafety(text) {
     const severity = Number(item.severity ?? 0);
     scores[category] = severity;
 
-    if (severity >= 1) {
-      matchedCategories.push({ category, severity, threshold: 1 });
+    const threshold = thresholds[category] ?? 4;
+    if (severity >= threshold) {
+      matchedCategories.push({ category, severity, threshold });
     }
   }
 

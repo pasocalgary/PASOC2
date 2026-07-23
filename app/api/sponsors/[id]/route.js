@@ -2,10 +2,49 @@ export const dynamic = 'force-dynamic';
 
 import pool from "@/lib/db";
 import { NextResponse } from "next/server";
+import { getAdminAuth } from "@/lib/firebase-admin";
 import {
 	shouldRejectForModeration,
-	getModerationErrorMessage, 
+	getModerationErrorMessage,
 } from "@/app/_utils/moderationHelpers";
+
+const ROLES = { SUPERADMIN: 1, ADMIN: 2 };
+
+async function getAuthenticatedUser(request) {
+	const authHeader = request.headers.get("authorization") || "";
+	const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+	if (!token) {
+		return { error: NextResponse.json({ error: "Missing bearer token" }, { status: 401 }) };
+	}
+	try {
+		const decoded = await getAdminAuth().verifyIdToken(token);
+		const [rows] = await pool.query("SELECT roleId FROM MemberInfo WHERE uuid = ? LIMIT 1", [decoded.uid]);
+		return { roleId: rows[0]?.roleId ?? 4 };
+	} catch {
+		return { error: NextResponse.json({ error: "Invalid or expired token" }, { status: 401 }) };
+	}
+}
+
+function isAdmin(roleId) {
+	const id = Number(roleId);
+	return id === ROLES.ADMIN || id === ROLES.SUPERADMIN;
+}
+
+function isValidHttpUrl(value) {
+	try {
+		const url = new URL(value);
+		return url.protocol === "http:" || url.protocol === "https:";
+	} catch {
+		return false;
+	}
+}
+
+const MALICIOUS_INPUT_PATTERN =
+	/(--|\/\*|\*\/|;|\bunion\s+select\b|\bdrop\s+table\b|\bdrop\s+database\b|\binsert\s+into\b|\bdelete\s+from\b|\bexec(\s|\()|\bxp_cmdshell\b|['"]\s*(or|and)\s*['"]?\s*\d|[<>]|javascript:|on\w+\s*=)/i;
+
+function containsMaliciousInput(value) {
+	return MALICIOUS_INPUT_PATTERN.test(value);
+}
 
 function toDbSponsorStatus(value) {
 	const normalized = String(value || "")
@@ -35,6 +74,12 @@ async function getSponsorModerationError(name, description) {
 
 export async function PUT(request, { params }) {
 	try {
+		const authResult = await getAuthenticatedUser(request);
+		if (authResult.error) return authResult.error;
+		if (!isAdmin(authResult.roleId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { id } = await params;
 		const body = await request.json();
 		const fields = [];
@@ -44,6 +89,9 @@ export async function PUT(request, { params }) {
 			const name = body.name.trim();
 			if (!name) {
 				return NextResponse.json({ error: "Name is required" }, { status: 400 });
+			}
+			if (containsMaliciousInput(name)) {
+				return NextResponse.json({ error: "Name contains invalid or unsafe characters" }, { status: 400 });
 			}
 			const moderationError = await getSponsorModerationError(name, body.description ?? "");
 			if (moderationError) {
@@ -71,8 +119,12 @@ export async function PUT(request, { params }) {
 		}
 
 		if (body.link !== undefined) {
+			const link = body.link.trim();
+			if (link && !isValidHttpUrl(link)) {
+				return NextResponse.json({ error: "Link must be a valid http(s) URL" }, { status: 400 });
+			}
 			fields.push("sponsorLink = ?");
-			values.push(body.link.trim() || null);
+			values.push(link || null);
 		}
 
 		if (body.imageUrl !== undefined) {
@@ -118,6 +170,12 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
 	try {
+		const authResult = await getAuthenticatedUser(request);
+		if (authResult.error) return authResult.error;
+		if (!isAdmin(authResult.roleId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { id } = await params;
 		const [result] = await pool.query(
 			`DELETE FROM SponsorInfo WHERE sponsorId = ?`,

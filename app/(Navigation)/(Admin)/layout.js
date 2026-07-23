@@ -21,7 +21,6 @@ export default async function AdminLayout({ children }) {
       [uid],
     );
     user = rows[0];
-    console.log("User Info:", user);
   } catch (error) {
     console.error("Database error during admin check:", error);
     redirect("/");

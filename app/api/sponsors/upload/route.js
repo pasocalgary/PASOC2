@@ -4,11 +4,41 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import r2 from "@/lib/r2";
+import pool from "@/lib/db";
+import { getAdminAuth } from "@/lib/firebase-admin";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+const ROLES = { SUPERADMIN: 1, ADMIN: 2 };
+
+async function getAuthenticatedUser(request) {
+  const authHeader = request.headers.get("authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    return { error: NextResponse.json({ success: false, error: "Missing bearer token" }, { status: 401 }) };
+  }
+  try {
+    const decoded = await getAdminAuth().verifyIdToken(token);
+    const [rows] = await pool.query("SELECT roleId FROM MemberInfo WHERE uuid = ? LIMIT 1", [decoded.uid]);
+    return { roleId: rows[0]?.roleId ?? 4 };
+  } catch {
+    return { error: NextResponse.json({ success: false, error: "Invalid or expired token" }, { status: 401 }) };
+  }
+}
+
+function isAdmin(roleId) {
+  const id = Number(roleId);
+  return id === ROLES.ADMIN || id === ROLES.SUPERADMIN;
+}
+
 export async function POST(request) {
   try {
+    const authResult = await getAuthenticatedUser(request);
+    if (authResult.error) return authResult.error;
+    if (!isAdmin(authResult.roleId)) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
