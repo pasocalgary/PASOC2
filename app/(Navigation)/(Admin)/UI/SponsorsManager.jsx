@@ -4,12 +4,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Plus, X, Link2, Upload, CalendarDays } from "lucide-react";
 import FeaturedSponsorCard from "./FeaturedSponsorCard";
 import OverTheYearsSponsorCard from "./OverTheYearsSponsorCard";
+import { useUserAuth } from "../../../_utils/auth-context";
 
 const FEATURED_SPONSOR_LIMIT = 5;
 const FEATURED_LIMIT_REACHED_MESSAGE =
 	"Featured limit is reached. Move one to Over the Years first.";
 
 export function SponsorsManager() {
+	const { user } = useUserAuth();
 	const [currentSponsors, setCurrentSponsors] = useState([]);
 	const [previousSponsors, setPreviousSponsors] = useState([]);
 	const [isAddSponsorModalOpen, setIsAddSponsorModalOpen] = useState(false);
@@ -133,6 +135,12 @@ export function SponsorsManager() {
 		setConfirmModal({ isOpen: false, action: null, sponsorId: null });
 	};
 
+	const authHeaders = useCallback(async () => {
+		if (!user) return {};
+		const token = await user.getIdToken();
+		return { Authorization: `Bearer ${token}` };
+	}, [user]);
+
 	const executeConfirmedAction = async () => {
 		const { action, sponsorId } = confirmModal;
 		if (!action || (!sponsorId && action !== "add")) return;
@@ -143,11 +151,12 @@ export function SponsorsManager() {
 			if (action === "delete") {
 				response = await fetch(`/api/sponsors/${sponsorId}`, {
 					method: "DELETE",
+					headers: await authHeaders(),
 				});
 			} else if (action === "move") {
 				response = await fetch(`/api/sponsors/${sponsorId}`, {
 					method: "PUT",
-					headers: { "Content-Type": "application/json" },
+					headers: { "Content-Type": "application/json", ...(await authHeaders()) },
 					body: JSON.stringify({ status: "previous" }),
 				});
 			} else if (action === "add") {
@@ -162,6 +171,7 @@ export function SponsorsManager() {
 					uploadForm.append("file", imageFile);
 					const uploadRes = await fetch("/api/sponsors/upload", {
 						method: "POST",
+						headers: await authHeaders(),
 						body: uploadForm,
 					});
 					const uploadJson = await uploadRes.json();
@@ -174,7 +184,7 @@ export function SponsorsManager() {
 
 				response = await fetch(url, {
 					method: isEdit ? "PUT" : "POST",
-					headers: { "Content-Type": "application/json" },
+					headers: { "Content-Type": "application/json", ...(await authHeaders()) },
 					body: JSON.stringify({
 						name: newSponsor.name.trim(),
 						description: newSponsor.description.trim(),
