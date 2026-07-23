@@ -40,11 +40,31 @@ export async function GET() {
                 sponsorId AS id,
                 sponsorName AS name,
                 sponsorDescription AS description,
+				sponsorLink AS link,
+				sponsorImageUrl AS imageUrl,
 				LOWER(sponsorStatus) AS status
 			FROM SponsorInfo
             ORDER BY sponsorName ASC
         `);
-		return NextResponse.json(rows);
+
+		const [eventRows] = await pool.query(`
+			SELECT se.sponsorId, e.eventId, e.title
+			FROM SponsorEvents se
+			JOIN Events e ON e.eventId = se.eventId
+		`);
+
+		const eventsBySponsorId = {};
+		for (const row of eventRows) {
+			if (!eventsBySponsorId[row.sponsorId]) eventsBySponsorId[row.sponsorId] = [];
+			eventsBySponsorId[row.sponsorId].push({ id: row.eventId, title: row.title });
+		}
+
+		const result = rows.map((row) => ({
+			...row,
+			events: eventsBySponsorId[row.id] || [],
+		}));
+
+		return NextResponse.json(result);
 	} catch (err) {
 		console.error("[GET /api/sponsors]", err.message);
 		return NextResponse.json({ error: err.message }, { status: 500 });
@@ -57,7 +77,12 @@ export async function POST(request) {
 		const id = `sp_${Date.now()}`;
 		const name = (body.name || "").trim();
 		const description = (body.description || "").trim();
+		const link = (body.link || "").trim();
+		const imageUrl = (body.imageUrl || "").trim();
 		const status = toDbSponsorStatus(body.status || "current");
+		const eventIds = Array.isArray(body.eventIds)
+			? [...new Set(body.eventIds)]
+			: [];
 
 		if (!name) {
 			return NextResponse.json(
@@ -82,13 +107,20 @@ export async function POST(request) {
 		}
 
 		await pool.query(
-			`INSERT INTO SponsorInfo (sponsorId, sponsorName, sponsorDescription, sponsorStatus)
-             VALUES (?, ?, ?, ?)`,
-			[id, name, description, status],
+			`INSERT INTO SponsorInfo (sponsorId, sponsorName, sponsorDescription, sponsorLink, sponsorImageUrl, sponsorStatus)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+			[id, name, description, link || null, imageUrl || null, status],
 		);
 
+		if (eventIds.length > 0) {
+			await pool.query(
+				`INSERT INTO SponsorEvents (sponsorId, eventId) VALUES ${eventIds.map(() => "(?, ?)").join(", ")}`,
+				eventIds.flatMap((eventId) => [id, eventId]),
+			);
+		}
+
 		return NextResponse.json(
-			{ id, name, description, status: status.toLowerCase() },
+			{ id, name, description, link, imageUrl, status: status.toLowerCase() },
 			{ status: 201 },
 		);
 	} catch (err) {

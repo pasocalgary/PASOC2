@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
-import Image from "next/image";
+import React, { useCallback, useEffect, useState } from "react";
+import { Plus, X, Link2, Upload, CalendarDays } from "lucide-react";
 import FeaturedSponsorCard from "./FeaturedSponsorCard";
 import OverTheYearsSponsorCard from "./OverTheYearsSponsorCard";
 
@@ -25,8 +24,60 @@ export function SponsorsManager() {
 	const [newSponsor, setNewSponsor] = useState({
 		name: "",
 		description: "",
+		link: "",
+		imageUrl: "",
+		eventIds: [],
 	});
 	const [formError, setFormError] = useState("");
+
+	const [events, setEvents] = useState([]);
+	const [imageFile, setImageFile] = useState(null);
+	const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+	const [isDragging, setIsDragging] = useState(false);
+
+	useEffect(() => {
+		if (!imageFile) { setImagePreviewUrl(""); return; }
+		const url = URL.createObjectURL(imageFile);
+		setImagePreviewUrl(url);
+		return () => URL.revokeObjectURL(url);
+	}, [imageFile]);
+
+	const displayImage = imagePreviewUrl || newSponsor.imageUrl;
+
+	const handleImageFiles = (files) => {
+		const file = files?.[0];
+		if (file && file.type.startsWith("image/")) setImageFile(file);
+	};
+	const handleDragOver = (event) => { event.preventDefault(); setIsDragging(true); };
+	const handleDragLeave = (event) => { event.preventDefault(); setIsDragging(false); };
+	const handleImageDrop = (event) => {
+		event.preventDefault();
+		setIsDragging(false);
+		handleImageFiles(event.dataTransfer.files);
+	};
+	const handleRemoveImage = () => {
+		setImageFile(null);
+		setNewSponsor((previous) => ({ ...previous, imageUrl: "" }));
+	};
+
+	const toggleEventId = (eventId) => {
+		setNewSponsor((previous) => {
+			const eventIds = previous.eventIds.includes(eventId)
+				? previous.eventIds.filter((id) => id !== eventId)
+				: [...previous.eventIds, eventId];
+			return { ...previous, eventIds };
+		});
+	};
+
+	const loadEvents = useCallback(async () => {
+		try {
+			const res = await fetch("/api/events", { cache: "no-store" });
+			const json = await res.json();
+			if (json.success) setEvents(json.data);
+		} catch (error) {
+			console.error(error);
+		}
+	}, []);
 
 	const selectedSponsorName =
 		currentSponsors.find((sponsor) => sponsor.id === confirmModal.sponsorId)
@@ -64,9 +115,13 @@ export function SponsorsManager() {
 		setIsAddSponsorModalOpen(false);
 		setEditingSponsorId(null);
 		setFormError("");
+		setImageFile(null);
 		setNewSponsor({
 			name: "",
 			description: "",
+			link: "",
+			imageUrl: "",
+			eventIds: [],
 		});
 	};
 
@@ -101,12 +156,31 @@ export function SponsorsManager() {
 					? `/api/sponsors/${editingSponsorId}`
 					: "/api/sponsors";
 
+				let imageUrl = newSponsor.imageUrl;
+				if (imageFile) {
+					const uploadForm = new FormData();
+					uploadForm.append("file", imageFile);
+					const uploadRes = await fetch("/api/sponsors/upload", {
+						method: "POST",
+						body: uploadForm,
+					});
+					const uploadJson = await uploadRes.json();
+					if (!uploadJson.success) {
+						setFormError(uploadJson.error || "Image upload failed.");
+						return;
+					}
+					imageUrl = uploadJson.url;
+				}
+
 				response = await fetch(url, {
 					method: isEdit ? "PUT" : "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						name: newSponsor.name.trim(),
 						description: newSponsor.description.trim(),
+						link: newSponsor.link.trim(),
+						imageUrl,
+						eventIds: newSponsor.eventIds,
 						status: "current",
 					}),
 				});
@@ -164,9 +238,13 @@ export function SponsorsManager() {
 
 		setEditingSponsorId(sponsorId);
 		setFormError("");
+		setImageFile(null);
 		setNewSponsor({
 			name: sponsorToEdit.name,
 			description: sponsorToEdit.description || "",
+			link: sponsorToEdit.link || "",
+			imageUrl: sponsorToEdit.imageUrl || "",
+			eventIds: (sponsorToEdit.events || []).map((event) => event.id),
 		});
 		setIsAddSponsorModalOpen(true);
 	};
@@ -184,7 +262,7 @@ export function SponsorsManager() {
 		openConfirmModal("add", null);
 	};
 
-	const loadSponsors = async () => {
+	const loadSponsors = useCallback(async () => {
 		try {
 			const res = await fetch("/api/sponsors", {
 				cache: "no-store",
@@ -200,6 +278,9 @@ export function SponsorsManager() {
 				id: s.id ?? s.sponsorId,
 				name: s.name ?? s.sponsorName ?? "",
 				description: s.description ?? s.sponsorDescription ?? "",
+				link: s.link ?? "",
+				imageUrl: s.imageUrl ?? "",
+				events: s.events ?? [],
 				status: s.status ?? s.sponsorStatus ?? "current",
 			}));
 
@@ -212,11 +293,15 @@ export function SponsorsManager() {
 		} catch (error) {
 			console.error(error);
 		}
-	};
+	}, []);
 
 	useEffect(() => {
 		loadSponsors();
-	}, []);
+	}, [loadSponsors]);
+
+	useEffect(() => {
+		loadEvents();
+	}, [loadEvents]);
 
 	return (
 		<div className="min-h-screen bg-[#f0ece1] flex flex-col font-sans">
@@ -297,14 +382,40 @@ export function SponsorsManager() {
 										{formError}
 									</p>
 								)}
-								<div className="mx-auto flex h-32 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border-2 border-gray-300 bg-gray-200">
-									<Image
-										src="/pasoc_logo.png"
-										alt="PASOC logo placeholder"
-										width={96}
-										height={96}
-										className="object-contain"
-									/>
+								<div className="mx-auto flex flex-col items-center gap-2">
+									{!displayImage ? (
+										<label
+											onDragOver={handleDragOver}
+											onDragLeave={handleDragLeave}
+											onDrop={handleImageDrop}
+											className={`flex h-32 w-32 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed text-center cursor-pointer transition ${
+												isDragging ? "border-[#556B2F] bg-[#f0f5e8]" : "border-gray-300 hover:border-[#556B2F]"
+											}`}
+										>
+											<Upload size={20} className="text-gray-400" />
+											<span className="px-2 text-xs text-gray-500">Drag & drop, or click to browse</span>
+											<input
+												type="file"
+												accept="image/*"
+												className="hidden"
+												onChange={(event) => handleImageFiles(event.target.files)}
+											/>
+										</label>
+									) : (
+										<div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-300 bg-gray-200">
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img src={displayImage} alt="Sponsor logo" className="h-full w-full object-contain" />
+											<button
+												type="button"
+												onClick={handleRemoveImage}
+												className="absolute top-1 right-1 rounded-full bg-white/90 p-1 shadow hover:bg-white"
+												aria-label="Remove image"
+											>
+												<X size={14} className="text-gray-700" />
+											</button>
+										</div>
+									)}
+									<p className="text-xs text-gray-400">Uploads on save. Max 5MB.</p>
 								</div>
 
 								<div className="space-y-4">
@@ -341,6 +452,49 @@ export function SponsorsManager() {
 											onChange={handleSponsorFieldChange}
 											className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 outline-none focus:outline-none focus:ring-2 focus:ring-[#556B2F]/50"
 										/>
+									</div>
+
+									<div>
+										<label
+											htmlFor="link"
+											className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-700"
+										>
+											<Link2 size={14} /> Link
+										</label>
+										<input
+											id="link"
+											name="link"
+											type="url"
+											placeholder="https://example.com"
+											value={newSponsor.link}
+											onChange={handleSponsorFieldChange}
+											className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 outline-none focus:outline-none focus:ring-2 focus:ring-[#556B2F]/50"
+										/>
+									</div>
+
+									<div>
+										<label className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-700">
+											<CalendarDays size={14} /> Events Sponsored
+										</label>
+										<div className="max-h-36 overflow-y-auto rounded-md border border-gray-300 p-2">
+											{events.length === 0 ? (
+												<p className="text-sm text-gray-400">No events available.</p>
+											) : (
+												events.map((event) => (
+													<label
+														key={event.eventId}
+														className="flex items-center gap-2 py-1 text-sm text-gray-700"
+													>
+														<input
+															type="checkbox"
+															checked={newSponsor.eventIds.includes(event.eventId)}
+															onChange={() => toggleEventId(event.eventId)}
+														/>
+														{event.title}
+													</label>
+												))
+											)}
+										</div>
 									</div>
 
 									<div className="flex justify-end">
