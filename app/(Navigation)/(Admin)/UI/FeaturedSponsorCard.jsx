@@ -12,13 +12,18 @@ export default function FeaturedSponsorCard({
 		<div className="relative w-full max-w-7xl rounded-3xl border border-[#d8d2c4] bg-white p-5 md:p-7 shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
 			<div className="flex flex-col md:flex-row gap-5 md:gap-7">
 				<div className="w-24 h-24 md:w-30 md:h-30 rounded-2xl border border-gray-300 bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
-					<Image
-						src="/pasoc_logo.png"
-						alt={`${sponsor.name} logo`}
-						width={80}
-						height={80}
-						className="object-contain"
-					/>
+					{sponsor.imageUrl ? (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img src={sponsor.imageUrl} alt={`${sponsor.name} logo`} className="w-full h-full object-contain" />
+					) : (
+						<Image
+							src="/pasoc_logo.png"
+							alt={`${sponsor.name} logo`}
+							width={80}
+							height={80}
+							className="object-contain"
+						/>
+					)}
 				</div>
 
 				<div className="flex-1 min-w-0">
@@ -30,6 +35,23 @@ export default function FeaturedSponsorCard({
 						{sponsor.description ||
 							"Information about this sponsor will be displayed here soon."}
 					</p>
+
+					{sponsor.link && (
+						<a
+							href={sponsor.link}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="mt-2 inline-block text-sm font-semibold text-[#556B2F] hover:underline"
+						>
+							Visit Website
+						</a>
+					)}
+
+					{sponsor.events && sponsor.events.length > 0 && (
+						<p className="mt-3 text-sm text-neutral-500">
+							Sponsored: {sponsor.events.map((event) => event.title).join(", ")}
+						</p>
+					)}
 				</div>
 			</div>
 

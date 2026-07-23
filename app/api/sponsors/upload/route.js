@@ -34,12 +34,12 @@ export async function POST(request) {
     }
 
     const extension = file.name.includes(".") ? file.name.split(".").pop() : "";
-    const key = `events/${uuidv4()}${extension ? `.${extension}` : ""}`;
+    const key = `sponsors/${uuidv4()}${extension ? `.${extension}` : ""}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     await r2.send(
       new PutObjectCommand({
-        Bucket: process.env.R2_EVENTS_BUCKET_NAME,
+        Bucket: process.env.R2_SPONSORS_BUCKET_NAME,
         Key: key,
         Body: buffer,
         ContentType: file.type,
@@ -48,10 +48,10 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      url: `${process.env.R2_EVENTS_PUBLIC_URL}/${key}`,
+      url: `${process.env.R2_SPONSORS_PUBLIC_URL}/${key}`,
     });
   } catch (err) {
-    console.error("[POST /api/events/upload]", err.message);
+    console.error("[POST /api/sponsors/upload]", err.message);
     return NextResponse.json(
       { success: false, error: err.message },
       { status: 500 }

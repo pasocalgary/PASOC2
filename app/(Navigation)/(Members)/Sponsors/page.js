@@ -5,26 +5,34 @@ import Image from "next/image";
 import { HeroSection } from "@/app/(Navigation)/(Members)/UI/HeroSection";
 import { Skeleton } from "@/app/_components/Skeleton";
 
-function CurrentSponsorCardReadOnly({ sponsor }) {
+function CurrentSponsorCardReadOnly({ sponsor, onClick }) {
 	return (
-		<article className="w-full rounded-3xl border border-[#d8d2c4] bg-white p-5 md:p-7 shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
-			<div className="flex flex-col md:flex-row gap-5 md:gap-7">
-				<div className="w-24 h-24 md:w-30 md:h-30 rounded-2xl border border-gray-300 bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
-					<Image
-						src="/pasoc_logo.png"
-						alt={`${sponsor.name} logo`}
-						width={80}
-						height={80}
-						className="object-contain"
-					/>
+		<article
+			onClick={onClick}
+			className="w-full rounded-2xl border border-[#d8d2c4] bg-white p-4 md:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.08)] cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
+		>
+			<div className="flex items-center gap-4 md:gap-5">
+				<div className="w-14 h-14 md:w-16 md:h-16 rounded-xl border border-gray-300 bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+					{sponsor.imageUrl ? (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img src={sponsor.imageUrl} alt={`${sponsor.name} logo`} className="w-full h-full object-contain" />
+					) : (
+						<Image
+							src="/pasoc_logo.png"
+							alt={`${sponsor.name} logo`}
+							width={56}
+							height={56}
+							className="object-contain"
+						/>
+					)}
 				</div>
 
 				<div className="flex-1 min-w-0">
-					<h3 className="text-3xl font-bold leading-tight text-neutral-900 md:text-4xl mb-3">
+					<h3 className="text-lg md:text-xl font-bold leading-tight text-neutral-900">
 						{sponsor.name}
 					</h3>
 
-					<p className="whitespace-pre-line text-lg leading-relaxed text-neutral-700 md:text-xl">
+					<p className="mt-1 truncate text-sm text-neutral-600">
 						{sponsor.description ||
 							"Information about this sponsor will be displayed here soon."}
 					</p>
@@ -34,17 +42,93 @@ function CurrentSponsorCardReadOnly({ sponsor }) {
 	);
 }
 
-function PreviousSponsorCardReadOnly({ sponsor }) {
+function SponsorInformation({ sponsor, onClose }) {
 	return (
-		<article className="w-36 md:w-44 p-5 bg-white rounded-3xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] border border-[#d8d2c4] flex flex-col items-center gap-4 transition-transform duration-200 hover:-translate-y-1">
-			<div className="w-20 h-20 bg-gray-200 rounded-2xl border border-gray-300 flex items-center justify-center shrink-0">
-				<Image
-					src="/pasoc_logo.png"
-					alt={`${sponsor.name} logo`}
-					width={64}
-					height={64}
-					className="object-contain"
-				/>
+		<div
+			className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 p-4"
+			onClick={onClose}
+		>
+			<div
+				className="bg-white rounded-lg p-6 shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto relative"
+				onClick={(event) => event.stopPropagation()}
+			>
+				<button
+					onClick={onClose}
+					className="absolute top-2 right-4 text-gray-500 hover:text-black text-lg"
+					aria-label="Close"
+				>
+					✕
+				</button>
+
+				<div className="flex flex-col items-center text-center gap-3">
+					<div className="w-20 h-20 rounded-2xl border border-gray-300 bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+						{sponsor.imageUrl ? (
+							// eslint-disable-next-line @next/next/no-img-element
+							<img src={sponsor.imageUrl} alt={`${sponsor.name} logo`} className="w-full h-full object-contain" />
+						) : (
+							<Image
+								src="/pasoc_logo.png"
+								alt={`${sponsor.name} logo`}
+								width={64}
+								height={64}
+								className="object-contain"
+							/>
+						)}
+					</div>
+
+					<h2 className="text-xl font-bold text-neutral-900">{sponsor.name}</h2>
+
+					<p className="whitespace-pre-line text-sm leading-relaxed text-neutral-700">
+						{sponsor.description ||
+							"Information about this sponsor will be displayed here soon."}
+					</p>
+
+					{sponsor.link && (
+						<a
+							href={sponsor.link}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-block text-sm font-semibold text-white bg-[#556B2F] px-3 py-1.5 rounded-md hover:bg-[#445622]"
+						>
+							Visit Website ↗
+						</a>
+					)}
+
+					{sponsor.events && sponsor.events.length > 0 && (
+						<div className="w-full mt-2 text-left">
+							<h3 className="text-sm font-semibold text-neutral-900 mb-1">Events Sponsored</h3>
+							<ul className="text-sm text-neutral-600 list-disc list-inside">
+								{sponsor.events.map((event) => (
+									<li key={event.id}>{event.title}</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function PreviousSponsorCardReadOnly({ sponsor, onClick }) {
+	return (
+		<article
+			onClick={onClick}
+			className="w-36 md:w-44 p-5 bg-white rounded-3xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] border border-[#d8d2c4] flex flex-col items-center gap-4 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+		>
+			<div className="w-20 h-20 bg-gray-200 rounded-2xl border border-gray-300 flex items-center justify-center shrink-0 overflow-hidden">
+				{sponsor.imageUrl ? (
+					// eslint-disable-next-line @next/next/no-img-element
+					<img src={sponsor.imageUrl} alt={`${sponsor.name} logo`} className="w-full h-full object-contain" />
+				) : (
+					<Image
+						src="/pasoc_logo.png"
+						alt={`${sponsor.name} logo`}
+						width={64}
+						height={64}
+						className="object-contain"
+					/>
+				)}
 			</div>
 
 			<div className="text-center">
@@ -60,6 +144,7 @@ export default function SponsorsPage() {
 	const [currentSponsors, setCurrentSponsors] = useState([]);
 	const [previousSponsors, setPreviousSponsors] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [selectedSponsor, setSelectedSponsor] = useState(null);
 
 	useEffect(() => {
 		const loadSponsors = async () => {
@@ -80,6 +165,9 @@ export default function SponsorsPage() {
 					name: sponsor.name ?? sponsor.sponsorName ?? "",
 					description:
 						sponsor.description ?? sponsor.sponsorDescription ?? "",
+					link: sponsor.link ?? "",
+					imageUrl: sponsor.imageUrl ?? "",
+					events: sponsor.events ?? [],
 					status:
 						sponsor.status ?? sponsor.sponsorStatus ?? "current",
 				}));
@@ -124,18 +212,17 @@ export default function SponsorsPage() {
 						</div>
 
 						{loading ? (
-							<div className="grid gap-6">
+							<div className="grid gap-4 md:grid-cols-2">
 								{[0, 1].map((index) => (
 									<div
 										key={index}
-										className="w-full rounded-3xl border border-[#d8d2c4] bg-white p-5 md:p-7 shadow-[0_16px_36px_rgba(0,0,0,0.08)]"
+										className="w-full rounded-2xl border border-[#d8d2c4] bg-white p-4 md:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.08)]"
 									>
-										<div className="flex flex-col md:flex-row gap-5 md:gap-7">
-											<Skeleton className="w-24 h-24 md:w-30 md:h-30 rounded-2xl shrink-0" />
-											<div className="flex-1 min-w-0 flex flex-col gap-3">
-												<Skeleton className="h-8 w-1/2" />
-												<Skeleton className="h-5 w-full" />
-												<Skeleton className="h-5 w-2/3" />
+										<div className="flex items-center gap-4 md:gap-5">
+											<Skeleton className="w-14 h-14 md:w-16 md:h-16 rounded-xl shrink-0" />
+											<div className="flex-1 min-w-0 flex flex-col gap-2">
+												<Skeleton className="h-5 w-1/3" />
+												<Skeleton className="h-4 w-2/3" />
 											</div>
 										</div>
 									</div>
@@ -146,11 +233,12 @@ export default function SponsorsPage() {
 								No featured sponsors are listed yet.
 							</div>
 						) : (
-							<div className="grid gap-6">
+							<div className="grid gap-4 md:grid-cols-2">
 								{currentSponsors.map((sponsor) => (
 									<CurrentSponsorCardReadOnly
 										key={sponsor.id}
 										sponsor={sponsor}
+										onClick={() => setSelectedSponsor(sponsor)}
 									/>
 								))}
 							</div>
@@ -187,6 +275,7 @@ export default function SponsorsPage() {
 									<PreviousSponsorCardReadOnly
 										key={sponsor.id}
 										sponsor={sponsor}
+										onClick={() => setSelectedSponsor(sponsor)}
 									/>
 								))}
 							</div>
@@ -194,6 +283,13 @@ export default function SponsorsPage() {
 					</section>
 				</div>
 			</section>
+
+			{selectedSponsor && (
+				<SponsorInformation
+					sponsor={selectedSponsor}
+					onClose={() => setSelectedSponsor(null)}
+				/>
+			)}
 		</main>
 	);
 }
