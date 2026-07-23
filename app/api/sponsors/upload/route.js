@@ -39,7 +39,7 @@ export async function POST(request) {
 
     await r2.send(
       new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
+        Bucket: process.env.R2_SPONSORS_BUCKET_NAME,
         Key: key,
         Body: buffer,
         ContentType: file.type,
@@ -48,7 +48,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      url: `${process.env.R2_PUBLIC_URL}/${key}`,
+      url: `${process.env.R2_SPONSORS_PUBLIC_URL}/${key}`,
     });
   } catch (err) {
     console.error("[POST /api/sponsors/upload]", err.message);
