@@ -1,7 +1,6 @@
-// Server-side helper for PASOC moderation using Azure AI Content Safety
+// Server-side helper for PASOC moderation using the OpenAI Moderation API
 import "server-only";
-import ContentSafetyClient, { isUnexpected } from "@azure-rest/ai-content-safety";
-import { AzureKeyCredential } from "@azure/core-auth";
+import OpenAI from "openai";
 
 export const MODERATED_FIELDS = new Set([
   "firstName",
@@ -15,62 +14,36 @@ export const MODERATED_FIELDS = new Set([
   "description",
 ]);
 
-const DEFAULT_THRESHOLDS = {
-  Hate: 4,
-  Sexual: 4,
-  Violence: 4,
-  SelfHarm: 4,
-};
-
-const NAME_FIELD_THRESHOLDS = {
-  Hate: 4,
-  Sexual: 4,
-  Violence: 4,
-  SelfHarm: 4,
+const CATEGORY_BUCKETS = {
+  Hate: ["hate", "hate/threatening"],
+  Sexual: ["sexual", "sexual/minors"],
+  Violence: ["violence", "violence/graphic"],
+  SelfHarm: ["self-harm", "self-harm/intent", "self-harm/instructions"],
 };
 
 let cachedClient = null;
 
-function getContentSafetyClient() {
+function getOpenAIClient() {
   if (cachedClient) return cachedClient;
 
-  const endpoint = process.env.CONTENT_SAFETY_ENDPOINT;
-  const key = process.env.CONTENT_SAFETY_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
-    // 👉 ADD LOGS HERE
-  console.log("CONTENT_SAFETY_ENDPOINT:", endpoint);
-  console.log("CONTENT_SAFETY_KEY exists:", Boolean(key));
-
-  if (!endpoint || !key) {
+  if (!apiKey) {
     throw new Error(
-      "Azure AI Content Safety is not configured. Missing CONTENT_SAFETY_ENDPOINT or CONTENT_SAFETY_KEY."
+      "OpenAI moderation is not configured. Missing OPENAI_API_KEY."
     );
   }
 
-  cachedClient = ContentSafetyClient(endpoint, new AzureKeyCredential(key));
+  cachedClient = new OpenAI({ apiKey, maxRetries: 0 });
   return cachedClient;
-}
-
-function normalizeCategoryName(category) {
-  const map = {
-    hate: "Hate",
-    sexual: "Sexual",
-    violence: "Violence",
-    selfharm: "SelfHarm",
-    "self-harm": "SelfHarm",
-    self_harm: "SelfHarm",
-  };
-
-  return map[String(category).toLowerCase()] ?? String(category);
 }
 
 export function shouldModerateField(key) {
   return MODERATED_FIELDS.has(key);
 }
 
-export async function analyzeTextSafety(text, options = {}) {
+export async function analyzeTextSafety(text) {
   const value = typeof text === "string" ? text.trim() : "";
-  const thresholds = { ...DEFAULT_THRESHOLDS, ...(options.thresholds ?? {}) };
 
   if (!value) {
     return {
@@ -82,48 +55,35 @@ export async function analyzeTextSafety(text, options = {}) {
     };
   }
 
-  const client = getContentSafetyClient();
+  const client = getOpenAIClient();
 
-  const response = await client.path("/text:analyze").post({
-    body: {
-      text: value,
-    },
+  const response = await client.moderations.create({
+    model: "omni-moderation-latest",
+    input: value,
   });
 
-  console.log("STATUS:", response.status);
-  console.log("FULL AZURE RESPONSE:", JSON.stringify(response.body, null, 2));
+  const result = response?.results?.[0];
 
-  if (isUnexpected(response)) {
-    throw new Error(`Azure request failed with status ${response.status}`);
-  }
-
-  // ✅ 👉 ADD IT RIGHT HERE
-  if (!response.body?.categoriesAnalysis?.length) {
-    console.log("⚠️ No categories returned from Azure — failing closed");
-
+  if (!result) {
     return {
       ok: false,
       shouldBlock: true,
       scores: {},
       matchedCategories: [],
-      raw: response.body,
+      raw: response,
     };
   }
-
-  // 👇 existing logic continues
-  const categoriesAnalysis = response.body.categoriesAnalysis;
 
   const scores = {};
   const matchedCategories = [];
 
-  for (const item of categoriesAnalysis) {
-    const category = normalizeCategoryName(item.category);
-    const severity = Number(item.severity ?? 0);
-    scores[category] = severity;
+  for (const [bucket, keys] of Object.entries(CATEGORY_BUCKETS)) {
+    const bucketScore = Math.max(...keys.map((k) => result.category_scores?.[k] ?? 0));
+    scores[bucket] = bucketScore;
 
-    const threshold = thresholds[category] ?? 4;
-    if (severity >= threshold) {
-      matchedCategories.push({ category, severity, threshold });
+    const flagged = keys.some((k) => result.categories?.[k]);
+    if (flagged) {
+      matchedCategories.push({ category: bucket, score: bucketScore });
     }
   }
 
@@ -132,11 +92,11 @@ export async function analyzeTextSafety(text, options = {}) {
     shouldBlock: matchedCategories.length > 0,
     scores,
     matchedCategories,
-    raw: response.body,
+    raw: result,
   };
 }
 
-export async function shouldRejectForModeration(key, value, options = {}) {
+export async function shouldRejectForModeration(key, value) {
   if (!shouldModerateField(key)) {
     return {
       shouldReject: false,
@@ -147,15 +107,7 @@ export async function shouldRejectForModeration(key, value, options = {}) {
     };
   }
 
-  const isNameField =
-    key === "firstName" || key === "lastName" || key === "preferredName";
-
-  const result = await analyzeTextSafety(value, {
-    ...options,
-    thresholds: isNameField
-      ? { ...NAME_FIELD_THRESHOLDS, ...(options.thresholds ?? {}) }
-      : options.thresholds,
-  });
+  const result = await analyzeTextSafety(value);
 
   return {
     shouldReject: result.shouldBlock,

@@ -22,7 +22,7 @@ export async function POST(req) {
 
       const result = await shouldRejectForModeration(key, fields[key]);
 
-      console.log("🧠 Azure result:", {
+      console.log("🧠 Moderation result:", {
         key,
         scores: result.scores,
         matchedCategories: result.matchedCategories,
