@@ -12,6 +12,8 @@ export const MODERATED_FIELDS = new Set([
   "body",
   "name",
   "description",
+  "question",
+  "answer",
 ]);
 
 const CATEGORY_BUCKETS = {
@@ -38,6 +40,31 @@ function getOpenAIClient() {
   return cachedClient;
 }
 
+const RETRY_DELAYS_MS = [500, 1000, 2000, 4000];
+
+function isRetryableStatus(status, code) {
+  // insufficient_quota is a 429 too, but it's a billing issue, not a transient
+  // rate limit - retrying it just adds latency without ever succeeding.
+  if (status === 429) return code !== "insufficient_quota";
+  return status >= 500 && status < 600;
+}
+
+async function createModerationWithRetry(client, params) {
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await client.moderations.create(params);
+    } catch (error) {
+      const isLastAttempt = attempt === RETRY_DELAYS_MS.length;
+      if (!isRetryableStatus(error?.status, error?.code) || isLastAttempt) {
+        throw error;
+      }
+
+      const delay = RETRY_DELAYS_MS[attempt] + Math.random() * 250;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export function shouldModerateField(key) {
   return MODERATED_FIELDS.has(key);
 }
@@ -57,10 +84,29 @@ export async function analyzeTextSafety(text) {
 
   const client = getOpenAIClient();
 
-  const response = await client.moderations.create({
-    model: "omni-moderation-latest",
-    input: value,
-  });
+  let response;
+  try {
+    response = await createModerationWithRetry(client, {
+      model: "omni-moderation-latest",
+      input: value,
+    });
+  } catch (error) {
+    console.error(
+      "OpenAI moderation request failed:",
+      error?.status,
+      error?.code,
+      error?.message
+    );
+
+    // Fail-open: don't block real users if the moderation API is down.
+    return {
+      ok: false,
+      shouldBlock: false,
+      scores: {},
+      matchedCategories: [],
+      raw: null,
+    };
+  }
 
   const result = response?.results?.[0];
 
