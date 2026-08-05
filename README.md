@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PASOC's 2nd Website/Platform
+
+A full-stack membership management platform built for the **Pangasinan Society of Calgary (PASOC)**, a Filipino-Canadian nonprofit organization. PASOC handles member registration, donations, events, and sponsor management in one place.
+
+Built by **JBYRDS Inc.** maintained by **Benjamin Noel**
+
+## Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org) (App Router)
+- **Database:** MySQL
+- **Auth:** Firebase Auth (ID token verification on the server)
+- **Payments:** Stripe (webhooks, donations, membership fees)
+- **Email:** Resend (WIP)
+- **Media/Object Storage:** Cloudflare R2
+- **Content Moderation:** Azure AI Content Safety (WIP)
+- **Deployment:** Hostinger VPS via [Dokploy](https://dokploy.com) + Docker (Traefik for routing/SSL)
+
+## Features
+
+- Member registration and role-based access control (`roleId`)
+- Donation and membership payments via Stripe, with webhook-driven status updates
+- Sponsor admin dashboard with logo uploads (presigned URL flow to Cloudflare R2), external links, and event tagging
+- Automated email flows via Resend (currently: guest signup welcome email)
+- Content moderation on user-submitted text via Azure AI Content Safety
+- Input validation and sanitization against XSS/SQLi
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (LTS recommended)
+- MySQL instance (local or remote)
+- Accounts/API keys for: Firebase, Stripe, Resend, Cloudflare R2, Azure AI Content Safety
+
+### Environment Variables
+
+Copy the variables from the sent document to `.env.local` and fill in the required values.
+
+Credentials themselves are not stored in this repo, reach out to Benjamin Noel or Jerome Noel for access to the relevant keys.
+
+### Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app. The page auto-updates as you edit files under `app/`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+PASOC is deployed via Dokploy on a managed VPS, with Traefik handling routing/SSL. Deployment configuration and access are managed by Benjamin Noel - see internal deployment docs or contact for details.
 
-## Learn More
+Media assets are served separately via Cloudflare R2.
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/              # Next.js App Router pages, API routes, and route-scoped UI components
+lib/              # Shared utilities (db, firebase-admin, r2)
+public/           # Static assets
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributing
 
-## Deploy on Vercel
+This is a client project for PASOC, maintained under the PASOC GitHub org. For repo access, environment setup help, or contribution guidelines, contact Benjamin Noel directly.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary, built for the Pangasinan Society of Calgary. Not licensed for reuse without permission.
